@@ -13,6 +13,7 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 
 import { FcGoogle } from "react-icons/fc";
 import { FaGoogle } from "react-icons/fa";
+import { co } from "google-translate-api-jp/languages.js";
 
 export const Auth = () => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,19 @@ export const Auth = () => {
   const [error, setError] = useState("");
 
   console.log(auth?.currentUser?.email);
+  //validate email and password
+
+  const validateName = (name) => {
+    return name.length > 0;
+  };
+
+  const validateEmail = (email) => {
+    return email.includes("@");
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
 
   const signIn = async () => {
     try {
