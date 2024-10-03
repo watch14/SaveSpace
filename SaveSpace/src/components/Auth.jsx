@@ -104,12 +104,9 @@ export const Auth = () => {
         }}
         value={name}
       />
-      <div>
-        {" "}
-        {nameError && (
-          <p className="text-red-500 text-sm mt-1 text-left">{nameError}</p>
-        )}
-      </div>
+      {nameError && (
+        <p className="text-red-500 text-sm mt-1 text-left">{nameError}</p>
+      )}
 
       <Input
         type="email"
