@@ -1,16 +1,11 @@
 import {
-  ChevronLeft,
   Home,
-  LineChart,
-  Package,
   Package2,
-  PanelLeft,
-  PlusCircle,
   Search,
   Settings,
-  ShoppingCart,
   Upload,
-  Users2,
+  User,
+  Plus,
 } from "lucide-react";
 
 import {
@@ -29,7 +24,7 @@ export function Aside() {
             href="#"
             className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
           >
-            <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
+            <Plus className="h-4 w-4 transition-all group-hover:scale-110" />
             <span className="sr-only">Acme Inc</span>
           </a>
           <Tooltip>
@@ -51,7 +46,7 @@ export function Aside() {
                 href="#"
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
-                <Users2 className="h-5 w-5" />
+                <User className="h-5 w-5" />
                 <span className="sr-only">User</span>
               </a>
             </TooltipTrigger>
