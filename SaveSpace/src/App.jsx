@@ -12,7 +12,7 @@ function App() {
       <div className="flex flex-row gap-3 justify-center">
         <SignOut />
       </div>
-      <h1 className="mt-4 mb-4 text-4xl font-bold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+      <h1 className="scroll-m-20 border-b pb-2 text-5xl font-semibold tracking-tight first:mt-0">
         SaveSpace
       </h1>
       <Auth />

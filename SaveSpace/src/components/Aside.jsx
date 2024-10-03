@@ -19,6 +19,13 @@ import {
   TooltipProvider,
 } from "../components/ui/tooltip";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { SignOut } from "@/utils/SignOut";
+
 export function Aside() {
   const [isDark, setIsDark] = React.useState(() => {
     // Check the local storage for a saved theme preference
@@ -88,10 +95,10 @@ export function Aside() {
                   <Moon className="h-5 w-5" />
                 )}
 
-                <span className="sr-only">Search</span>
+                <span className="sr-only">Theme</span>
               </a>
             </TooltipTrigger>
-            <TooltipContent side="right">Search</TooltipContent>
+            <TooltipContent side="right">Theme</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -105,11 +112,11 @@ export function Aside() {
               </a>
             </TooltipTrigger>
 
-            <TooltipContent side="right">Analytics</TooltipContent>
+            <TooltipContent side="right">User</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <Popover>
+            <PopoverTrigger className="p-0 bg-inherit border-0 hover:border-0">
               <a
                 href="#"
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
@@ -117,9 +124,11 @@ export function Aside() {
                 <Settings className="h-5 w-5" />
                 <span className="sr-only">Settings</span>
               </a>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
+            </PopoverTrigger>
+            <PopoverContent>
+              <SignOut />
+            </PopoverContent>
+          </Popover>
         </nav>
       </aside>
     </TooltipProvider>
