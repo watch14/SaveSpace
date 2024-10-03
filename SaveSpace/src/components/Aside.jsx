@@ -42,31 +42,8 @@ export function Aside() {
                 <span className="sr-only">Dashboard</span>
               </a>
             </TooltipTrigger>
+
             <TooltipContent side="right">Dashboard</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                <span className="sr-only">Orders</span>
-              </a>
-            </TooltipTrigger>
-            <TooltipContent side="right">Orders</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <Package className="h-5 w-5" />
-                <span className="sr-only">Products</span>
-              </a>
-            </TooltipTrigger>
-            <TooltipContent side="right">Products</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -75,21 +52,10 @@ export function Aside() {
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <Users2 className="h-5 w-5" />
-                <span className="sr-only">Customers</span>
+                <span className="sr-only">User</span>
               </a>
             </TooltipTrigger>
-            <TooltipContent side="right">Customers</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <LineChart className="h-5 w-5" />
-                <span className="sr-only">Analytics</span>
-              </a>
-            </TooltipTrigger>
+
             <TooltipContent side="right">Analytics</TooltipContent>
           </Tooltip>
         </nav>
