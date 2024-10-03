@@ -92,7 +92,7 @@ export const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3 pt-4 pb-4 w-max-60 ">
+    <div className="flex flex-col gap-3 pt-4 pb-4  ">
       <h2 className="text-2xl text-gray-300">Sign In</h2>
 
       <Input
