@@ -4,7 +4,6 @@ import { auth } from "../config/firebase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Input } from "./ui/input.jsx";
 import { Button } from "./ui/button.jsx";
-import { FormField, FormItem } from "./ui/form.jsx";
 
 export const Auth = () => {
   const [email, setEmail] = useState("");
@@ -18,9 +17,6 @@ export const Auth = () => {
 
   return (
     <div>
-      <FormItem />
-      <FormField />
-
       <Input
         type="email"
         placeholder="Email"
