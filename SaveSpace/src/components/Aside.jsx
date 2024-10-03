@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { SignOut } from "@/utils/SignOut";
+import { Button } from "./ui/button";
 
 export function Aside() {
   const [isDark, setIsDark] = React.useState(() => {
@@ -127,6 +128,16 @@ export function Aside() {
             </PopoverTrigger>
             <PopoverContent>
               <SignOut />
+
+              <Button onClick={() => setIsDark((prev) => !prev)} href="#">
+                {isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+
+                <span className="sr-only">Theme</span>
+              </Button>
             </PopoverContent>
           </Popover>
         </nav>
