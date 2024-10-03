@@ -13,7 +13,6 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 
 import { FcGoogle } from "react-icons/fc";
 import { FaGoogle } from "react-icons/fa";
-import { set } from "react-hook-form";
 
 export const Auth = () => {
   const [email, setEmail] = useState("");
@@ -26,6 +25,7 @@ export const Auth = () => {
   const signIn = async () => {
     try {
       setError("");
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -45,6 +45,8 @@ export const Auth = () => {
 
   const signInWithGoogle = async () => {
     try {
+      setError("");
+
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
       console.log("user:", user);
