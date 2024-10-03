@@ -2,6 +2,9 @@ import React from "react";
 import { useState } from "react";
 import { auth } from "../config/firebase.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Input } from "./ui/input.jsx";
+import { Button } from "./ui/button.jsx";
+import { FormField, FormItem } from "./ui/form.jsx";
 
 export const Auth = () => {
   const [email, setEmail] = useState("");
@@ -15,24 +18,21 @@ export const Auth = () => {
 
   return (
     <div>
-      <input
-        placeholder="Email..."
+      <FormItem />
+      <FormField />
+
+      <Input
         type="email"
-        className={
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        }
+        placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
       />
 
-      <input
-        placeholder="Password..."
+      <Input
         type="password"
-        className={
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        }
+        placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={signIn}> Sign In</button>
+      <Button onClick={signIn}>Sign In</Button>
     </div>
   );
 };
