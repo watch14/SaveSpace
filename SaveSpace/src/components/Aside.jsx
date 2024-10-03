@@ -1,3 +1,5 @@
+import React, { useEffect } from "react";
+
 import {
   Home,
   Package2,
@@ -6,6 +8,8 @@ import {
   Upload,
   User,
   Plus,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -16,6 +20,22 @@ import {
 } from "../components/ui/tooltip";
 
 export function Aside() {
+  const [isDark, setIsDark] = React.useState(() => {
+    // Check the local storage for a saved theme preference
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark";
+  });
+
+  // Effect to set the dark class based on theme
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark"); // Save preference
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light"); // Save preference
+    }
+  }, [isDark]);
   return (
     <TooltipProvider>
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -40,6 +60,27 @@ export function Aside() {
 
             <TooltipContent side="right">Dashboard</TooltipContent>
           </Tooltip>
+        </nav>
+        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a
+                onClick={() => setIsDark((prev) => !prev)}
+                href="#"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+
+                <span className="sr-only">Search</span>
+              </a>
+            </TooltipTrigger>
+            <TooltipContent side="right">Search</TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <a
@@ -53,8 +94,7 @@ export function Aside() {
 
             <TooltipContent side="right">Analytics</TooltipContent>
           </Tooltip>
-        </nav>
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
+
           <Tooltip>
             <TooltipTrigger asChild>
               <a
