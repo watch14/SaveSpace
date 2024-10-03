@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Auth } from "./components/Auth.jsx";
 import { SignOut } from "./utils/SignOut.jsx";
+import { Aside } from "./components/Aside.jsx";
 
 import "./App.css";
 import ThemeToggle from "./components/ui/ThemeToggle.jsx";
@@ -8,6 +9,7 @@ import ThemeToggle from "./components/ui/ThemeToggle.jsx";
 function App() {
   return (
     <>
+      <Aside />
       <div className="flex flex-row gap-3 justify-center">
         <ThemeToggle />
         <SignOut />
