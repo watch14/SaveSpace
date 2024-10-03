@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { auth, googleProvider } from "../config/firebase.js";
 import {
   createUserWithEmailAndPassword,
@@ -10,57 +9,80 @@ import { Input } from "./ui/input.jsx";
 import { Button } from "./ui/button.jsx";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-
 import { FcGoogle } from "react-icons/fc";
 import { FaGoogle } from "react-icons/fa";
-import { co } from "google-translate-api-jp/languages.js";
 
 export const Auth = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  console.log(auth?.currentUser?.email);
-  //validate email and password
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const validateName = (name) => {
-    return name.length > 0;
+    if (name.length === 0) {
+      setNameError("Name is required");
+      return false;
+    } else {
+      setNameError("");
+      return true;
+    }
   };
 
   const validateEmail = (email) => {
-    return email.includes("@");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+      return false;
+    } else {
+      setEmailError("");
+      return true;
+    }
   };
 
   const validatePassword = (password) => {
-    return password.length >= 6;
+    if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters long");
+      return false;
+    } else {
+      setPasswordError("");
+      return true;
+    }
   };
 
-  const signIn = async () => {
-    try {
-      setError("");
+  const handleSignIn = async () => {
+    setError("");
 
+    // Perform validation before attempting sign in
+    const isNameValid = validateName(name);
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isNameValid || !isEmailValid || !isPasswordValid) {
+      return; // Exit if any validation fails
+    }
+
+    try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
       const user = userCredential.user;
-      // Update the user's profile with the display name
       await updateProfile(user, { displayName: name });
       console.log("user:", user);
     } catch (error) {
       const errorMessage = error.code.split("/")[1].split("-").join(" ");
-
       setError(errorMessage);
       console.log("error:", errorMessage);
     }
   };
 
-  const signInWithGoogle = async () => {
+  const handleGoogleSignIn = async () => {
     try {
       setError("");
-
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
       console.log("user:", user);
@@ -70,26 +92,50 @@ export const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3 pt-4 pb-4 border-red-800">
+    <div className="flex flex-col gap-3 pt-4 pb-4 w-max-60 ">
       <h2 className="text-2xl text-gray-300">Sign In</h2>
 
       <Input
         type="text"
         placeholder="Name"
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          setName(e.target.value);
+          validateName(e.target.value);
+        }}
+        value={name}
       />
+      <div>
+        {" "}
+        {nameError && (
+          <p className="text-red-500 text-sm mt-1 text-left">{nameError}</p>
+        )}
+      </div>
 
       <Input
         type="email"
         placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          validateEmail(e.target.value);
+        }}
+        value={email}
       />
+      {emailError && (
+        <p className="text-red-500 text-sm mt-1 text-left">{emailError}</p>
+      )}
 
       <Input
         type="password"
         placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          validatePassword(e.target.value);
+        }}
+        value={password}
       />
+      {passwordError && (
+        <p className="text-red-500 text-sm mt-1 text-left">{passwordError}</p>
+      )}
 
       {error && (
         <Alert variant="destructive">
@@ -98,24 +144,11 @@ export const Auth = () => {
         </Alert>
       )}
 
-      <Button onClick={signIn}>Sign In</Button>
+      <Button onClick={handleSignIn}>Sign In</Button>
 
-      <div className="flex flex-row w-full gap-2">
-        <Button
-          className=" w-full"
-          variant="outline"
-          onClick={signInWithGoogle}
-        >
-          <FcGoogle />
-        </Button>
-        <Button
-          className=" w-full"
-          variant="outline"
-          onClick={signInWithGoogle}
-        >
-          <FaGoogle />
-        </Button>
-      </div>
+      <Button className="w-full" variant="link" onClick={handleGoogleSignIn}>
+        <FcGoogle />
+      </Button>
     </div>
   );
 };
