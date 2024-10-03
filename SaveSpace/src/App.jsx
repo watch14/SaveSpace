@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Auth } from "./components/Auth.jsx";
+import { SignOut } from "./utils/SignOut.jsx";
 
 import "./App.css";
 import ThemeToggle from "./components/ui/ThemeToggle.jsx";
@@ -14,6 +15,7 @@ function App() {
       </h1>
 
       <Auth />
+      <SignOut />
     </>
   );
 }
