@@ -128,7 +128,6 @@ export function Aside() {
             </PopoverTrigger>
             <PopoverContent>
               <SignOut />
-
               <Button onClick={() => setIsDark((prev) => !prev)} href="#">
                 {isDark ? (
                   <Sun className="h-5 w-5" />
