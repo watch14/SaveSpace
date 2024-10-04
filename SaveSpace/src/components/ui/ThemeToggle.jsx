@@ -21,9 +21,9 @@ const ThemeToggle = () => {
   }, [isDark]);
 
   return (
-    <Button variant="secondary" onClick={() => setIsDark((prev) => !prev)}>
+    <a variant="secondary" onClick={() => setIsDark((prev) => !prev)}>
       {isDark ? <Sun /> : <Moon />}
-    </Button>
+    </a>
   );
 };
 
