@@ -10,3 +10,7 @@ export default function getUser() {
   //if there is no user, return null
   return user ? user : "null";
 }
+
+export const isUserLoggedIn = () => {
+  return auth.currentUser ? true : false;
+};

@@ -32,12 +32,14 @@ import {
 } from "@/components/ui/popover";
 import { SignOut } from "@/utils/SignOut";
 import { Button } from "./ui/button";
+import Loading from "./ui/loader";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);
   const [userPic, setUserPic] = React.useState(null);
 
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchUserName = () => {
       // Add auth state change listener
@@ -46,7 +48,6 @@ export function Aside() {
           // User is signed in
           const name = user.displayName;
           const pic = user.photoURL;
-          console.log("Profile picture:", pic);
           setUserName(name);
           setUserPic(pic);
         } else {
@@ -55,7 +56,7 @@ export function Aside() {
           setUserName(null);
           setUserPic(null);
         }
-        setLoading(false); // Set loading to false once auth state is resolved
+        setLoading(false);
       });
 
       // Cleanup the subscription on component unmount
@@ -75,15 +76,15 @@ export function Aside() {
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark"); // Save preference
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light"); // Save preference
+      localStorage.setItem("theme", "light");
     }
   }, [isDark]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
@@ -147,42 +148,55 @@ export function Aside() {
             <TooltipContent side="right">Theme</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <User className="h-5 w-5" />
-                <span className="sr-only">User</span>
-              </a>
-            </TooltipTrigger>
-
-            <TooltipContent side="right">User</TooltipContent>
-          </Tooltip>
-
           <Popover>
             <PopoverTrigger className="p-0 bg-inherit border-0 hover:border-0">
-              <a
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </a>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="#"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  >
+                    <User className="h-5 w-5" />
+                    <span className="sr-only">User</span>
+                  </a>
+                </TooltipTrigger>
+
+                <TooltipContent side="right">Settings</TooltipContent>
+              </Tooltip>
             </PopoverTrigger>
-            <PopoverContent className="ml-14 bg-primary-foreground border-2">
-              {userName && userPic && (
+            <PopoverContent className="ml-8 bg-primary-foreground border-2 absolute -top-16">
+              {userName && (
                 <div className="flex flex-row items-center justify-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={userPic} />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
+                  {userPic && (
+                    <Avatar>
+                      <AvatarImage src={userPic} />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                  )}
                   <p>{userName}</p>
                   <SignOut />
                 </div>
               )}
+            </PopoverContent>
+          </Popover>
 
+          <Popover>
+            <PopoverTrigger className="p-0 bg-inherit border-0 hover:border-0">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="#"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span className="sr-only">Settings</span>
+                  </a>
+                </TooltipTrigger>
+
+                <TooltipContent side="right">Settings</TooltipContent>
+              </Tooltip>
+            </PopoverTrigger>
+            <PopoverContent className="ml-8 bg-primary-foreground border-2 absolute -top-16">
               <Button onClick={() => setIsDark((prev) => !prev)} href="#">
                 {isDark ? (
                   <Sun className="h-5 w-5" />

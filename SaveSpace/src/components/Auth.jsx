@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { auth, googleProvider } from "../config/firebase.js";
 import {
   createUserWithEmailAndPassword,
-  signInWithCredential,
+  signInWithEmailAndPassword,
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
-import getUser from "../utils/getuser.js";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -90,6 +89,21 @@ export const Auth = () => {
       const errorMessage = error.code.split("/")[1].split("-").join(" ");
       setError(errorMessage);
       console.log("error:", errorMessage);
+    }
+  };
+
+  const handleSignIn = async () => {
+    try {
+      setError("");
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      console.log("user:", user);
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -181,6 +195,73 @@ export const Auth = () => {
           </CardContent>
           <CardFooter className="grid w-full grid-cols-2 gap-3">
             <Button className="w-full" onClick={handleSignUp}>
+              Sign Up
+            </Button>
+
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+            >
+              <FcGoogle />
+            </Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
+      <TabsContent value="Sign In">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sign In</CardTitle>
+            <CardDescription>Sign in with an existing account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3 w-full ">
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    validateEmail(e.target.value);
+                  }}
+                  value={email}
+                />
+                {emailError && (
+                  <p className="text-red-500 text-sm mt-1 text-left">
+                    {emailError}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validatePassword(e.target.value);
+                  }}
+                  value={password}
+                />
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1 text-left">
+                    {passwordError}
+                  </p>
+                )}
+              </div>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <AlertTitle className="text-left text-red-600">
+                    {error}
+                  </AlertTitle>
+                </Alert>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter className="grid w-full grid-cols-2 gap-3">
+            <Button className="w-full" onClick={handleSignIn}>
               Sign In
             </Button>
 
@@ -194,7 +275,6 @@ export const Auth = () => {
           </CardFooter>
         </Card>
       </TabsContent>
-      <TabsContent value="Sign In">Change your password here.</TabsContent>
     </Tabs>
   );
 };
