@@ -12,8 +12,6 @@ import { useTheme } from "@/components/ui/theme-provider";
 export function ModeToggle() {
   const { setTheme } = useTheme();
 
-  // Toggle theme from localstorage
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
