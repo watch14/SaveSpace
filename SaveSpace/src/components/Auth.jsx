@@ -125,7 +125,7 @@ export const Auth = () => {
   };
 
   return (
-    <Tabs defaultValue="Sign In" className="w-[400px]">
+    <Tabs defaultValue="Sign In" className="w-[340px]">
       <TabsList className="grid w-full grid-cols-2 h-fit ">
         <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
         <TabsTrigger value="Sign In">Sign In</TabsTrigger>
