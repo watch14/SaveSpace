@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useState, useEffect } from "react";
 
 import {
   Home,
@@ -19,6 +20,11 @@ import {
   TooltipProvider,
 } from "../components/ui/tooltip";
 
+import { auth } from "../config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import getUser from "@/utils/getuser";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   Popover,
   PopoverContent,
@@ -28,6 +34,37 @@ import { SignOut } from "@/utils/SignOut";
 import { Button } from "./ui/button";
 
 export function Aside() {
+  const [userName, setUserName] = React.useState(null);
+  const [userPic, setUserPic] = React.useState(null);
+
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchUserName = () => {
+      // Add auth state change listener
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is signed in
+          const name = user.displayName;
+          const pic = user.photoURL;
+          console.log("Profile picture:", pic);
+          setUserName(name);
+          setUserPic(pic);
+        } else {
+          // User is not signed in or state hasn't resolved
+          console.log("You need to login");
+          setUserName(null);
+          setUserPic(null);
+        }
+        setLoading(false); // Set loading to false once auth state is resolved
+      });
+
+      // Cleanup the subscription on component unmount
+      return () => unsubscribe();
+    };
+
+    fetchUserName();
+  }, []);
+
   const [isDark, setIsDark] = React.useState(() => {
     // Check the local storage for a saved theme preference
     const savedTheme = localStorage.getItem("theme");
@@ -44,6 +81,11 @@ export function Aside() {
       localStorage.setItem("theme", "light"); // Save preference
     }
   }, [isDark]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <TooltipProvider>
       <aside className="fixed inset-y-0 left-0 z-10  w-14 flex-col border-r bg-background sm:flex pt-1 pb-1 flex justify-end">
@@ -82,6 +124,9 @@ export function Aside() {
             <TooltipContent side="right">Todo List</TooltipContent>
           </Tooltip>
         </nav>
+
+        <a onClick={getUser}>user</a>
+
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -126,8 +171,18 @@ export function Aside() {
                 <span className="sr-only">Settings</span>
               </a>
             </PopoverTrigger>
-            <PopoverContent>
-              <SignOut />
+            <PopoverContent className="ml-16 bg-primary-foreground border-2">
+              {userName && userPic && (
+                <div className="flex flex-row items-center justify-center gap-3">
+                  <Avatar>
+                    <AvatarImage src={userPic} />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                  <p>{userName}</p>
+                  <SignOut />
+                </div>
+              )}
+
               <Button onClick={() => setIsDark((prev) => !prev)} href="#">
                 {isDark ? (
                   <Sun className="h-5 w-5" />

@@ -8,11 +8,10 @@ function App() {
   return (
     <>
       <Aside />
-      <div className="flex flex-row gap-3 justify-center"></div>
-      <h1 className="scroll-m-20 border-b pb-2 text-5xl font-semibold tracking-tight first:mt-0">
-        SaveSpace
-      </h1>
-      <Auth />
+      <div className="flex flex-col gap-3 justify-center">
+        <h1 className="">SaveSpace</h1>
+        <Auth />
+      </div>
     </>
   );
 }

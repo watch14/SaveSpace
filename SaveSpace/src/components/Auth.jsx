@@ -2,9 +2,22 @@ import React, { useState } from "react";
 import { auth, googleProvider } from "../config/firebase.js";
 import {
   createUserWithEmailAndPassword,
+  signInWithCredential,
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
+import getUser from "../utils/getuser.js";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 import { Input } from "./ui/input.jsx";
 import { Button } from "./ui/button.jsx";
 import { AlertCircle } from "lucide-react";
@@ -52,7 +65,7 @@ export const Auth = () => {
     }
   };
 
-  const handleSignIn = async () => {
+  const handleSignUp = async () => {
     setError("");
 
     // Perform validation before attempting sign in
@@ -92,60 +105,96 @@ export const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3 pt-4 pb-4  w-full">
-      <h2 className="text-2xl text-gray-300">Sign In</h2>
+    <Tabs defaultValue="Sign Up" className="w-[400px]">
+      <TabsList className="grid w-full grid-cols-2 h-fit ">
+        <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
+        <TabsTrigger value="Sign In">Sign In</TabsTrigger>
+      </TabsList>
+      <TabsContent value="Sign Up">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sign Up</CardTitle>
+            <CardDescription>Create an accont.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3 w-full ">
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Name"
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    validateName(e.target.value);
+                  }}
+                  value={name}
+                />
+                {nameError && (
+                  <p className="text-red-500 text-sm mt-1 text-left">
+                    {nameError}
+                  </p>
+                )}
+              </div>
 
-      <Input
-        type="text"
-        placeholder="Name"
-        onChange={(e) => {
-          setName(e.target.value);
-          validateName(e.target.value);
-        }}
-        value={name}
-      />
-      {nameError && (
-        <p className="text-red-500 text-sm mt-1 text-left">{nameError}</p>
-      )}
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    validateEmail(e.target.value);
+                  }}
+                  value={email}
+                />
+                {emailError && (
+                  <p className="text-red-500 text-sm mt-1 text-left">
+                    {emailError}
+                  </p>
+                )}
+              </div>
 
-      <Input
-        type="email"
-        placeholder="Email"
-        onChange={(e) => {
-          setEmail(e.target.value);
-          validateEmail(e.target.value);
-        }}
-        value={email}
-      />
-      {emailError && (
-        <p className="text-red-500 text-sm mt-1 text-left">{emailError}</p>
-      )}
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validatePassword(e.target.value);
+                  }}
+                  value={password}
+                />
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1 text-left">
+                    {passwordError}
+                  </p>
+                )}
+              </div>
 
-      <Input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => {
-          setPassword(e.target.value);
-          validatePassword(e.target.value);
-        }}
-        value={password}
-      />
-      {passwordError && (
-        <p className="text-red-500 text-sm mt-1 text-left">{passwordError}</p>
-      )}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <AlertTitle className="text-left text-red-600">
+                    {error}
+                  </AlertTitle>
+                </Alert>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter className="grid w-full grid-cols-2 gap-3">
+            <Button className="w-full" onClick={handleSignUp}>
+              Sign In
+            </Button>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle className="text-left">{error}</AlertTitle>
-        </Alert>
-      )}
-
-      <Button onClick={handleSignIn}>Sign In</Button>
-
-      <Button className="w-full" variant="link" onClick={handleGoogleSignIn}>
-        <FcGoogle />
-      </Button>
-    </div>
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+            >
+              <FcGoogle />
+            </Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
+      <TabsContent value="Sign In">Change your password here.</TabsContent>
+    </Tabs>
   );
 };
