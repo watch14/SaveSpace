@@ -84,7 +84,9 @@ export const Auth = () => {
       );
       const user = userCredential.user;
       await updateProfile(user, { displayName: name });
+
       console.log("user:", user);
+      window.location.href = "/"; //redirect to dashboard
     } catch (error) {
       const errorMessage = error.code.split("/")[1].split("-").join(" ");
       setError(errorMessage);
@@ -101,7 +103,9 @@ export const Auth = () => {
         password
       );
       const user = userCredential.user;
+
       console.log("user:", user);
+      window.location.href = "/"; //redirect to dashboard
     } catch (error) {
       setError(error.message);
     }
@@ -112,14 +116,16 @@ export const Auth = () => {
       setError("");
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
+
       console.log("user:", user);
+      window.location.href = "/"; //redirect to dashboard
     } catch (error) {
       setError(error.message);
     }
   };
 
   return (
-    <Tabs defaultValue="Sign Up" className="w-[400px]">
+    <Tabs defaultValue="Sign In" className="w-[400px]">
       <TabsList className="grid w-full grid-cols-2 h-fit ">
         <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
         <TabsTrigger value="Sign In">Sign In</TabsTrigger>

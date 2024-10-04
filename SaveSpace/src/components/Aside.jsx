@@ -73,7 +73,7 @@ export function Aside() {
       const loggedIn = await isUserLoggedIn();
       if (!loggedIn) {
       } else {
-        pass;
+        console.log("User is logged in");
       }
       setIsLoggedIn(loggedIn);
     };
