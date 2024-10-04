@@ -171,7 +171,7 @@ export function Aside() {
                 <span className="sr-only">Settings</span>
               </a>
             </PopoverTrigger>
-            <PopoverContent className="ml-16 bg-primary-foreground border-2">
+            <PopoverContent className="ml-14 bg-primary-foreground border-2">
               {userName && userPic && (
                 <div className="flex flex-row items-center justify-center gap-3">
                   <Avatar>
