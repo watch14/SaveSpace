@@ -17,7 +17,7 @@ export const ModeToggle = forwardRef((props, ref) => {
     <DropdownMenu>
       <DropdownMenuTrigger
         ref={ref} // Pass the ref to DropdownMenuTrigger
-        className="border-none bg-inherit text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 hover:bg-transparent active:bg-transparent focus:border-none focus:outline-none focus:ring-0"
+        className="border-none bg-inherit text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 hover:bg-transparent active:bg-transparent focus:border-nonee focus:ring-0"
         asChild
       >
         <Button variant="outline" size="icon">
@@ -26,7 +26,7 @@ export const ModeToggle = forwardRef((props, ref) => {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="absolute -top-20 ml-4">
         <DropdownMenuItem onClick={() => setTheme("light")}>
           Light
         </DropdownMenuItem>
