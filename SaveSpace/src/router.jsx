@@ -20,13 +20,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/auth",
-        element: <ProtectedRoute element={<Auth />} isRestricted={true} />,
+        element: <ProtectedRoute element={<Auth />} isRestricted={false} />,
       },
       {
         path: "/",
-        element: (
-          <ProtectedRoute element={<Dashboard />} isRestricted={false} />
-        ),
+        element: <ProtectedRoute element={<Dashboard />} isRestricted={true} />,
       },
       {
         path: "*",
