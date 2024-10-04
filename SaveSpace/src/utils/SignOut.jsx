@@ -7,6 +7,9 @@ export const SignOut = () => {
   const signOutUser = async () => {
     try {
       await signOut(auth);
+
+      window.location.reload(); //refresh
+
       console.log("User signed out");
     } catch (error) {
       console.error(error);

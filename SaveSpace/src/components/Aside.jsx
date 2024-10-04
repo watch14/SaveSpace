@@ -72,9 +72,8 @@ export function Aside() {
     const checkUserStatus = async () => {
       const loggedIn = await isUserLoggedIn();
       if (!loggedIn) {
-        console.log("You need to login");
       } else {
-        console.log("User is logged in");
+        pass;
       }
       setIsLoggedIn(loggedIn);
     };
@@ -181,7 +180,7 @@ export function Aside() {
               </Tooltip>
             </PopoverTrigger>
             <PopoverContent className="ml-8 bg-primary-foreground border-2 absolute -top-16">
-              {userName && (
+              {isLoggedIn && (
                 <div className="flex flex-row items-center justify-center gap-3">
                   {userPic && (
                     <Avatar>
@@ -191,6 +190,14 @@ export function Aside() {
                   )}
                   <p>{userName}</p>
                   <SignOut />
+                </div>
+              )}
+
+              {!isLoggedIn && (
+                <div className="flex flex-row items-center justify-center gap-3">
+                  <a href="/auth">
+                    <Button>Sign In</Button>
+                  </a>
                 </div>
               )}
             </PopoverContent>
