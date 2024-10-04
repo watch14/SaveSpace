@@ -207,8 +207,12 @@ export function Aside() {
                 <TooltipContent side="right">Settings</TooltipContent>
               </Tooltip>
             </PopoverTrigger>
-            <PopoverContent className="ml-8 bg-primary-foreground border-2 absolute -top-16">
-              <Button onClick={() => setIsDark((prev) => !prev)} href="#">
+            <PopoverContent className="ml-8 border-2 absolute -top-16">
+              <Button
+                variant="outline"
+                onClick={() => setIsDark((prev) => !prev)}
+                href="#"
+              >
                 {isDark ? (
                   <Sun className="h-5 w-5" />
                 ) : (
