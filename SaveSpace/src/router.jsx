@@ -24,7 +24,9 @@ const router = createBrowserRouter([
       },
       {
         path: "/",
-        element: <ProtectedRoute element={<Dashboard />} isRestricted={true} />,
+        element: (
+          <ProtectedRoute element={<Dashboard />} isRestricted={false} />
+        ),
       },
       {
         path: "*",

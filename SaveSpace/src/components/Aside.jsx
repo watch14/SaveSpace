@@ -22,7 +22,7 @@ import {
 
 import { auth } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import getUser from "@/utils/getuser";
+import getUser, { isUserLoggedIn } from "@/utils/getuser";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
@@ -64,6 +64,22 @@ export function Aside() {
     };
 
     fetchUserName();
+  }, []);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      const loggedIn = await isUserLoggedIn();
+      if (!loggedIn) {
+        console.log("You need to login");
+      } else {
+        console.log("User is logged in");
+      }
+      setIsLoggedIn(loggedIn);
+    };
+
+    checkUserStatus();
   }, []);
 
   const [isDark, setIsDark] = React.useState(() => {

@@ -1,4 +1,5 @@
 import { auth } from "../config/firebase.js";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function getUser() {
   const user = auth?.currentUser?.toJSON();
@@ -12,5 +13,15 @@ export default function getUser() {
 }
 
 export const isUserLoggedIn = () => {
-  return auth.currentUser ? true : false;
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is logged in
+        resolve(true);
+      } else {
+        // No user is logged in
+        resolve(false);
+      }
+    });
+  });
 };
