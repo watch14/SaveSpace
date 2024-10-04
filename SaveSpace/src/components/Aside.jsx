@@ -33,6 +33,7 @@ import {
 import { SignOut } from "@/utils/SignOut";
 import { Button } from "./ui/button";
 import Loading from "./ui/loader";
+import { ModeToggle } from "./ui/ThemeToggle";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);
@@ -146,19 +147,7 @@ export function Aside() {
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
-              <a
-                onClick={() => setIsDark((prev) => !prev)}
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-
-                <span className="sr-only">Theme</span>
-              </a>
+              <ModeToggle />
             </TooltipTrigger>
             <TooltipContent side="right">Theme</TooltipContent>
           </Tooltip>
@@ -179,7 +168,7 @@ export function Aside() {
                 <TooltipContent side="right">Settings</TooltipContent>
               </Tooltip>
             </PopoverTrigger>
-            <PopoverContent className="ml-8 bg-primary-foreground border-2 absolute -top-16">
+            <PopoverContent className="ml-8 border-2 absolute -top-16">
               {isLoggedIn && (
                 <div className="flex flex-row items-center justify-center gap-3">
                   {userPic && (
@@ -188,7 +177,7 @@ export function Aside() {
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                   )}
-                  <p>{userName}</p>
+                  <p className=" text-secondary-foreground">{userName}</p>
                   <SignOut />
                 </div>
               )}
