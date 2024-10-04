@@ -1,5 +1,5 @@
+import React, { forwardRef } from "react"; // Import forwardRef
 import { Moon, Sun } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,14 +9,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/ui/theme-provider";
 
-export function ModeToggle() {
+// Use forwardRef to create the ModeToggle component
+export const ModeToggle = forwardRef((props, ref) => {
   const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        ref={ref} // Pass the ref to DropdownMenuTrigger
+        className="border-none bg-inherit text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 hover:bg-transparent active:bg-transparent focus:border-none focus:outline-none focus:ring-0"
         asChild
-        className="border-none bg-inherit text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 hover:bg-transparent active:bg-transparent active:border-none"
       >
         <Button variant="outline" size="icon">
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -37,4 +39,4 @@ export function ModeToggle() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});
