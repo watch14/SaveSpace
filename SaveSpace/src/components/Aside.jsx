@@ -140,9 +140,8 @@ export function Aside() {
             </TooltipTrigger>
             <TooltipContent side="right">Todo List</TooltipContent>
           </Tooltip>
+          <a onClick={getUser}>user</a>
         </nav>
-
-        <a onClick={getUser}>user</a>
 
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
