@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../config/firebase";
-import { doc, setDoc, getDocs, collection } from "firebase/firestore";
-
+import {
+  doc,
+  setDoc,
+  getDocs,
+  collection,
+  Timestamp,
+  addDoc,
+} from "firebase/firestore";
 import {
   Dialog,
   DialogContent,
@@ -12,20 +18,17 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-
 import { useForm } from "react-hook-form";
-
 import { CalendarIcon } from "lucide-react";
 import {
   Form,
@@ -41,43 +44,72 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Card } from "./ui/card";
 
+// Define the form validation schema
 const FormSchema = z.object({
+  title: z.string().min(1, "Task title is required."),
+  description: z.string().optional(),
   dob: z.date({
-    required_error: "A date of birth is required.",
+    required_error: "A deadline is required.",
   }),
 });
 
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState("");
-  const [date, setDate] = useState("null");
-
-  useEffect(() => {
-    const getTodos = async () => {
-      try {
-        const data = await getDocs(collection(db, "todoList"));
-        const filteredData = data.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log(filteredData);
-        setTodos(filteredData);
-      } catch (error) {
-        console.error("Error fetching todos:", error);
-      }
-    };
-
-    getTodos();
-  }, []);
-
+  const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
   const form = useForm({
     resolver: zodResolver(FormSchema),
   });
 
-  function onSubmit(data) {
-    console.log(data.dob);
-    setDate(data.dob);
+  // Function to fetch todos from Firestore
+  const getTodos = async () => {
+    try {
+      const data = await getDocs(collection(db, "todoList"));
+      const filteredData = data.docs.map((doc) => {
+        const data = doc.data();
+        const deadline = data.deadline
+          ? new Date(data.deadline.seconds * 1000)
+          : null;
+        return {
+          id: doc.id,
+          ...data,
+          deadline,
+        };
+      });
+      console.log(filteredData);
+      setTodos(filteredData);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+    }
+  };
+
+  // Fetch todos from Firestore on component mount
+  useEffect(() => {
+    getTodos();
+  }, []);
+
+  // Submit handler for the form
+  async function onSubmit(data) {
+    const timestamp = Timestamp.fromDate(data.dob);
+
+    // Save the new task to Firestore using addDoc for auto-generated ID
+    try {
+      await addDoc(collection(db, "todoList"), {
+        title: data.title,
+        description: data.description,
+        done: false,
+        deadline: timestamp,
+      });
+      console.log("Task created successfully!");
+      // Refresh the todo list after creating a task
+      await getTodos(); // Refetch todos after creating a new task
+      form.reset(); // Reset the form fields after submission
+      setDialogOpen(false); // Close the dialog
+    } catch (error) {
+      console.error("Error creating task: ", error);
+    }
   }
 
   return (
@@ -85,17 +117,37 @@ const TodoList = () => {
       <h1 className="text-xl font-semibold mb-2">Todo List</h1>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>
+          <Card key={todo.id}>
             <p>{todo.title}</p>
             <p>{todo.description}</p>
-            <p>{todo.done ? "✅" : "❌"}</p>
-          </li>
+            {todo.deadline && (
+              <p>
+                Deadline:
+                {todo.deadline.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            )}
+            <div className="flex items-center space-x-2 justify-center">
+              <Checkbox id="terms" />
+              <label
+                htmlFor="terms"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Done
+              </label>
+            </div>
+          </Card>
         ))}
       </ul>
-
-      <Dialog>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {" "}
+        {/* Control dialog open state */}
         <DialogTrigger asChild>
-          <Button>
+          <Button onClick={() => setDialogOpen(true)}>
+            {/* Open the dialog */}
             <Edit className="mr-2 h-4 w-4" /> Create Task
           </Button>
         </DialogTrigger>
@@ -104,28 +156,26 @@ const TodoList = () => {
             <DialogTitle>Create To-Do</DialogTitle>
             <DialogDescription>Add a new todo item below.</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Task
-              </Label>
-              <Input id="title" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right">
-                Description
-              </Label>
-              <Textarea id="description" className="col-span-3" />
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="title" className="text-right">
+                    Task
+                  </Label>
+                  <Input id="title" {...form.register("title")} />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="description" className="text-right">
+                    Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    {...form.register("description")}
+                  />
+                </div>
 
-            {/*                           Calender                              */}
-            {/* llllllllllllllllllllllllllllllllllllllllllllllllllllllllllll */}
-
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
-              >
+                {/* Calendar Component for Deadline */}
                 <FormField
                   control={form.control}
                   name="dob"
@@ -166,20 +216,21 @@ const TodoList = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Submit</Button>
-              </form>
-            </Form>
-            {/* llllllllllllllllllllllllllllllllllllllllllllllllllllllllllll */}
-            {/* llllllllllllllllllllllllllllllllllllllllllllllllllllllllllll */}
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Close
-              </Button>
-            </DialogClose>
-            <Button type="submit">Create Task</Button>
-          </DialogFooter>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    Close
+                  </Button>
+                </DialogClose>
+                <Button type="submit">Create Task</Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
