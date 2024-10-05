@@ -113,13 +113,13 @@ export function Aside() {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <a
-                href="#"
+              <Link
+                to="/todo"
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <ListChecks className="h-5 w-5" />
                 <span className="sr-only">Todo List</span>
-              </a>
+              </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Todo List</TooltipContent>
           </Tooltip>

@@ -8,7 +8,7 @@ import { Auth } from "./components/Auth.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import NotFound from "./components/NotFound.jsx";
 import Profile from "./components/Profile.jsx";
-import TodoList from "./components/todoList.jsx";
+import TodoList from "./components/TodoList.jsx";
 
 const router = createBrowserRouter([
   {
