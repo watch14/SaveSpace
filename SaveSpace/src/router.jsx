@@ -8,6 +8,7 @@ import { Auth } from "./components/Auth.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import NotFound from "./components/NotFound.jsx";
 import Profile from "./components/Profile.jsx";
+import TodoList from "./components/todoList.jsx";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "/profile",
         element: <ProtectedRoute element={<Profile />} isRestricted={false} />,
+      },
+      {
+        path: "/todo",
+        element: <ProtectedRoute element={<TodoList />} isRestricted={false} />,
       },
       {
         path: "*",

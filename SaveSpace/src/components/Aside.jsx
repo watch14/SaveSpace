@@ -40,7 +40,7 @@ import { ModeToggle } from "./ui/ThemeToggle";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);
-  const [userPic, setUserPic] = React.useState("https://github.com/shadcn.png");
+  const [userPic, setUserPic] = React.useState(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +62,6 @@ export function Aside() {
         setLoading(false);
       });
 
-      // Cleanup the subscription on component unmount
       return () => unsubscribe();
     };
 
@@ -155,12 +154,12 @@ export function Aside() {
               <Link to={"/profile"}>
                 {isLoggedIn && (
                   <div className="flex flex-row items-center justify-center gap-3">
-                    {userPic && (
-                      <Avatar>
-                        <AvatarImage src={userPic} />
-                        <AvatarFallback>PFP</AvatarFallback>
-                      </Avatar>
-                    )}
+                    <Avatar>
+                      <AvatarImage src={userPic} />
+                      <AvatarFallback>
+                        <img src="https://github.com/shadcn.png" alt="PIC" />
+                      </AvatarFallback>
+                    </Avatar>
                     <p className=" text-secondary-foreground">{userName}</p>
                     <SignOut />
                   </div>
