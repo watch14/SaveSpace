@@ -148,7 +148,7 @@ export function Aside() {
                 <TooltipContent side="right">Settings</TooltipContent>
               </Tooltip>
             </PopoverTrigger>
-            <PopoverContent className="ml-8 border-2 absolute -top-16">
+            <PopoverContent className="ml-8 absolute -top-16">
               {isLoggedIn && (
                 <div className="flex flex-row items-center justify-center gap-3">
                   {userPic && (
@@ -188,7 +188,7 @@ export function Aside() {
                 <TooltipContent side="right">Settings</TooltipContent>
               </Tooltip>
             </PopoverTrigger>
-            <PopoverContent className="ml-8 border-2 absolute -top-16">
+            <PopoverContent className="ml-8  absolute -top-16">
               <ModeToggle />
             </PopoverContent>
           </Popover>
