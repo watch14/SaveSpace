@@ -134,7 +134,7 @@ const TodoList = () => {
                       <FormLabel>Deadline</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <FormControl>
+                          <FormControl className="flex flex-row gap-3 justify-between w-full">
                             <Button
                               variant={"outline"}
                               className={cn(
