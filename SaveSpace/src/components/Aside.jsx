@@ -37,7 +37,7 @@ import { ModeToggle } from "./ui/ThemeToggle";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);
-  const [userPic, setUserPic] = React.useState(null);
+  const [userPic, setUserPic] = React.useState("https://github.com/shadcn.png");
 
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +52,6 @@ export function Aside() {
           setUserName(name);
           setUserPic(pic);
         } else {
-          // User is not signed in or state hasn't resolved
           console.log("You need to login");
           setUserName(null);
           setUserPic(null);
@@ -74,7 +73,6 @@ export function Aside() {
       const loggedIn = await isUserLoggedIn();
       if (!loggedIn) {
       } else {
-        console.log("User is logged in");
       }
       setIsLoggedIn(loggedIn);
     };
@@ -173,7 +171,7 @@ export function Aside() {
                   {userPic && (
                     <Avatar>
                       <AvatarImage src={userPic} />
-                      <AvatarFallback>CN</AvatarFallback>
+                      <AvatarFallback>PFP</AvatarFallback>
                     </Avatar>
                   )}
                   <p className=" text-secondary-foreground">{userName}</p>
