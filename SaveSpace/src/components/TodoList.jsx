@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { db } from "../config/firebase";
 import {
@@ -7,6 +9,8 @@ import {
   collection,
   Timestamp,
   addDoc,
+  deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import {
   Dialog,
@@ -16,24 +20,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
+import { CalendarIcon, Edit, Trash2, Plus, Search, Filter } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, isAfter, isBefore, isEqual } from "date-fns";
 import { useForm } from "react-hook-form";
-import { CalendarIcon } from "lucide-react";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -45,25 +46,44 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Card } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Define the form validation schema
 const FormSchema = z.object({
   title: z.string().min(1, "Task title is required."),
   description: z.string().optional(),
-  dob: z.date({
-    required_error: "A deadline is required.",
-  }),
+  dob: z.date().optional(),
 });
 
-const TodoList = () => {
+export default function TodoList() {
   const [todos, setTodos] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog open/close
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingTodo, setEditingTodo] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState(null);
   const form = useForm({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      dob: undefined,
+    },
   });
 
-  // Function to fetch todos from Firestore
   const getTodos = async () => {
     try {
       const data = await getDocs(collection(db, "todoList"));
@@ -78,124 +98,164 @@ const TodoList = () => {
           deadline,
         };
       });
-      console.log(filteredData);
       setTodos(filteredData);
     } catch (error) {
       console.error("Error fetching todos:", error);
     }
   };
 
-  // Fetch todos from Firestore on component mount
   useEffect(() => {
     getTodos();
   }, []);
 
-  // Submit handler for the form
   async function onSubmit(data) {
-    const timestamp = Timestamp.fromDate(data.dob);
-
-    // Save the new task to Firestore using addDoc for auto-generated ID
+    const timestamp = data.dob ? Timestamp.fromDate(data.dob) : null;
     try {
-      await addDoc(collection(db, "todoList"), {
-        title: data.title,
-        description: data.description,
-        done: false,
-        deadline: timestamp,
-      });
-      console.log("Task created successfully!");
-      // Refresh the todo list after creating a task
-      await getTodos(); // Refetch todos after creating a new task
-      form.reset(); // Reset the form fields after submission
-      setDialogOpen(false); // Close the dialog
+      if (editingTodo) {
+        await updateDoc(doc(db, "todoList", editingTodo.id), {
+          title: data.title,
+          description: data.description,
+          deadline: timestamp,
+        });
+      } else {
+        await addDoc(collection(db, "todoList"), {
+          title: data.title,
+          description: data.description,
+          done: false,
+          deadline: timestamp,
+        });
+      }
+      await getTodos();
+      form.reset();
+      setDialogOpen(false);
+      setEditingTodo(null);
     } catch (error) {
-      console.error("Error creating task: ", error);
+      console.error("Error saving task: ", error);
     }
   }
 
-  return (
-    <div>
-      <h1 className="text-xl font-semibold mb-2">Todo List</h1>
-      <ul>
-        {todos.map((todo) => (
-          <Card key={todo.id}>
-            <p>{todo.title}</p>
-            <p>{todo.description}</p>
-            {todo.deadline && (
-              <p>
-                Deadline:
-                {todo.deadline.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-            )}
-            <div className="flex items-center space-x-2 justify-center">
-              <Checkbox id="terms" />
-              <label
-                htmlFor="terms"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Done
-              </label>
-            </div>
-          </Card>
-        ))}
-      </ul>
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        {" "}
-        {/* Control dialog open state */}
-        <DialogTrigger asChild>
-          <Button onClick={() => setDialogOpen(true)}>
-            {/* Open the dialog */}
-            <Edit className="mr-2 h-4 w-4" /> Create Task
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create To-Do</DialogTitle>
-            <DialogDescription>Add a new todo item below.</DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="title" className="text-right">
-                    Task
-                  </Label>
-                  <Input id="title" {...form.register("title")} />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    {...form.register("description")}
-                  />
-                </div>
+  const toggleTodo = async (id, done) => {
+    try {
+      await updateDoc(doc(db, "todoList", id), { done: !done });
+      await getTodos();
+    } catch (error) {
+      console.error("Error updating todo:", error);
+    }
+  };
 
-                {/* Calendar Component for Deadline */}
+  const deleteTodo = async (id) => {
+    try {
+      await deleteDoc(doc(db, "todoList", id));
+      await getTodos();
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  };
+
+  const editTodo = (todo) => {
+    setEditingTodo(todo);
+    form.reset({
+      title: todo.title,
+      description: todo.description,
+      dob: todo.deadline,
+    });
+    setDialogOpen(true);
+  };
+
+  const filteredTodos = todos.filter((todo) => {
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "done" && todo.done) ||
+      (filter === "notDone" && !todo.done);
+    const matchesSearch = todo.title
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesDate =
+      !dateFilter ||
+      (todo.deadline &&
+        (isEqual(todo.deadline, dateFilter) ||
+          (isBefore(todo.deadline, dateFilter) &&
+            isAfter(todo.deadline, new Date()))));
+    return matchesFilter && matchesSearch && matchesDate;
+  });
+
+  return (
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Todo List</h1>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              onClick={() => {
+                setEditingTodo(null);
+                form.reset();
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Create Task
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingTodo ? "Edit Task" : "Create Task"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingTodo
+                  ? "Edit your todo item below."
+                  : "Add a new todo item below."}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Task</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="dob"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-4 items-center gap-4 text-right ">
-                      <FormLabel>Deadline</FormLabel>
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Deadline (Optional)</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <FormControl className="flex flex-row gap-3 justify-between w-full">
+                          <FormControl>
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-fit pl-3 text-left font-normal ",
+                                "w-[240px] pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
                               {field.value ? (
                                 format(field.value, "PPP")
                               ) : (
-                                <span>Pick a date</span>
+                                <span>No deadline</span>
                               )}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
@@ -206,35 +266,138 @@ const TodoList = () => {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date()}
+                            disabled={(date) =>
+                              date < new Date(new Date().setHours(0, 0, 0, 0))
+                            }
                             initialFocus
                           />
                         </PopoverContent>
                       </Popover>
-                      <FormDescription></FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setDialogOpen(false)}
-                  >
-                    Close
+                <DialogFooter>
+                  <Button type="submit">
+                    {editingTodo ? "Update Task" : "Create Task"}
                   </Button>
-                </DialogClose>
-                <Button type="submit">Create Task</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <Label htmlFor="search" className="sr-only">
+            Search
+          </Label>
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="search"
+              placeholder="Search tasks..."
+              className="pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter tasks" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="done">Done</SelectItem>
+            <SelectItem value="notDone">On Going</SelectItem>
+          </SelectContent>
+        </Select>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-[180px]">
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateFilter ? format(dateFilter, "PPP") : "Filter by date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dateFilter}
+              onSelect={setDateFilter}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {filteredTodos.map((todo) => (
+          <Card
+            key={todo.id}
+            className={cn(
+              todo.done && "opacity-60",
+              "flex flex-col justify-between"
+            )}
+          >
+            <CardHeader>
+              <CardTitle className="grid grid-flow-col justify-between text-left overflow-clip">
+                <span
+                  className={cn(
+                    todo.done && "line-through",
+                    "overflow-hidden text-ellipsis w-full"
+                  )}
+                >
+                  {todo.title}
+                </span>
+                <Badge variant="outline" className="h-fit w-fit">
+                  <CalendarIcon className="mr-1 h-3 w-3" />
+                  {todo.deadline
+                    ? format(todo.deadline, "MMM d, yyyy")
+                    : "No deadline"}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                {todo.description}
+              </p>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`todo-${todo.id}`}
+                  checked={todo.done}
+                  onCheckedChange={() => toggleTodo(todo.id, todo.done)}
+                />
+                <label
+                  htmlFor={`todo-${todo.id}`}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {todo.done ? "Completed" : "Mark as complete"}
+                </label>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => editTodo(todo)}
+                  disabled={todo.done}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => deleteTodo(todo.id)}
+                  disabled={todo.done}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
-};
-
-export default TodoList;
+}
