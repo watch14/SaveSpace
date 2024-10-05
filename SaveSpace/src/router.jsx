@@ -7,6 +7,7 @@ import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 import { Auth } from "./components/Auth.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import NotFound from "./components/NotFound.jsx";
+import Profile from "./components/Profile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute element={<Dashboard />} isRestricted={false} />
         ),
+      },
+      {
+        path: "/profile",
+        element: <ProtectedRoute element={<Profile />} isRestricted={false} />,
       },
       {
         path: "*",

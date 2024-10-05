@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 import {
   Home,
@@ -23,6 +24,8 @@ import {
 import { auth } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import getUser, { isUserLoggedIn } from "@/utils/getuser";
+import { useAuth } from "@/context/AuthContext"; // Import the useAuth hook
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
@@ -149,18 +152,20 @@ export function Aside() {
               </Tooltip>
             </PopoverTrigger>
             <PopoverContent className="ml-8 absolute -top-16">
-              {isLoggedIn && (
-                <div className="flex flex-row items-center justify-center gap-3">
-                  {userPic && (
-                    <Avatar>
-                      <AvatarImage src={userPic} />
-                      <AvatarFallback>PFP</AvatarFallback>
-                    </Avatar>
-                  )}
-                  <p className=" text-secondary-foreground">{userName}</p>
-                  <SignOut />
-                </div>
-              )}
+              <Link to={"/profile"}>
+                {isLoggedIn && (
+                  <div className="flex flex-row items-center justify-center gap-3">
+                    {userPic && (
+                      <Avatar>
+                        <AvatarImage src={userPic} />
+                        <AvatarFallback>PFP</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <p className=" text-secondary-foreground">{userName}</p>
+                    <SignOut />
+                  </div>
+                )}
+              </Link>
 
               {!isLoggedIn && (
                 <div className="flex flex-row items-center justify-center gap-3">
