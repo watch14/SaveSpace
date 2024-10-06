@@ -344,7 +344,7 @@ export default function TodoList() {
                 <span
                   className={cn(
                     todo.done && "line-through",
-                    "overflow-hidden text-ellipsis w-full"
+                    "overflow-hidden text-ellipsis w-full  pb-1"
                   )}
                 >
                   {todo.title}
