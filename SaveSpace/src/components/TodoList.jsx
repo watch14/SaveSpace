@@ -582,14 +582,11 @@ export default function TodoList() {
               </Badge>
 
               {/* Display Collaborators */}
-              <div className="mt-2">
-                <h4 className="font-medium">Collaborators:</h4>
-                <p className="text-sm text-muted-foreground">
-                  {todo.collaborators && todo.collaborators.length > 0
-                    ? todo.collaborators.join(", ")
-                    : "No collaborators"}
-                </p>
-              </div>
+              <Badge className="mt-2 text-sm text-muted-foreground">
+                {todo.collaborators && todo.collaborators.length > 0
+                  ? todo.collaborators.join(", ")
+                  : "No collaborators"}
+              </Badge>
             </CardContent>
 
             <CardFooter className="flex justify-between">
