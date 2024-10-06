@@ -79,6 +79,7 @@ export default function TodoList() {
   const [dateFilter, setDateFilter] = useState(null);
   const [sortOrder, setSortOrder] = useState("none");
   const [newCategory, setNewCategory] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -218,6 +219,8 @@ export default function TodoList() {
 
   const filteredTodos = todos
     .filter((todo) => {
+      const matchesCategory =
+        !categoryFilter || todo.category === categoryFilter;
       const matchesFilter =
         filter === "all" ||
         (filter === "done" && todo.done) ||
@@ -231,7 +234,7 @@ export default function TodoList() {
           (isEqual(todo.deadline, dateFilter) ||
             (isBefore(todo.deadline, dateFilter) &&
               isAfter(todo.deadline, new Date()))));
-      return matchesFilter && matchesSearch && matchesDate;
+      return matchesCategory && matchesFilter && matchesSearch && matchesDate;
     })
     .sort((a, b) => {
       if (sortOrder === "soonest") {
@@ -396,8 +399,8 @@ export default function TodoList() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+      <div className="mb-6 grid flex-col sm:flex-row gap-4 w-full">
+        <div className="">
           <Label htmlFor="search" className="sr-only">
             Search
           </Label>
@@ -412,43 +415,66 @@ export default function TodoList() {
             />
           </div>
         </div>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Filter tasks" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="done">Done</SelectItem>
-            <SelectItem value="notDone">On Going</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={sortOrder} onValueChange={setSortOrder}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Sort by deadline" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">Default</SelectItem>
-            <SelectItem value="soonest">Soonest</SelectItem>
-            <SelectItem value="latest">Latest</SelectItem>
-          </SelectContent>
-        </Select>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[160px]">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateFilter ? format(dateFilter, "PPP") : "Filter by date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={dateFilter}
-              onSelect={setDateFilter}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="">
+              <SelectValue placeholder="Filter tasks" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="done">Done</SelectItem>
+              <SelectItem value="notDone">On Going</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger className="">
+              <SelectValue placeholder="Sort by deadline" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Default</SelectItem>
+              <SelectItem value="soonest">Soonest</SelectItem>
+              <SelectItem value="latest">Latest</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Label htmlFor="category" className="sr-only">
+            Filter by category
+          </Label>
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={null}>All</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateFilter ? format(dateFilter, "PPP") : "Filter by date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateFilter}
+                onSelect={setDateFilter}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredTodos.map((todo) => (
           <Card
