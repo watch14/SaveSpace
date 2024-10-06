@@ -66,16 +66,19 @@ const FormSchema = z.object({
   title: z.string().min(1, "Task title is required."),
   description: z.string().optional(),
   dob: z.date().optional(),
+  category: z.string().min(1, "Category is required."),
 });
 
 export default function TodoList() {
   const [todos, setTodos] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState(null);
   const [sortOrder, setSortOrder] = useState("none");
+  const [newCategory, setNewCategory] = useState("");
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -83,6 +86,7 @@ export default function TodoList() {
       title: "",
       description: "",
       dob: undefined,
+      category: "",
     },
   });
 
@@ -106,31 +110,67 @@ export default function TodoList() {
     }
   };
 
+  const getCategories = async () => {
+    try {
+      const data = await getDocs(collection(db, "category"));
+      const categoryData = data.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(categoryData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
   useEffect(() => {
     getTodos();
+    getCategories();
   }, []);
 
   async function onSubmit(data) {
     const timestamp = data.dob ? Timestamp.fromDate(data.dob) : null;
     try {
+      let categoryId = data.category;
+      if (data.category === "new" && newCategory.trim() !== "") {
+        const newCategoryRef = await addDoc(collection(db, "category"), {
+          name: newCategory,
+          tasks: [],
+        });
+        categoryId = newCategoryRef.id;
+        await getCategories();
+      }
+
       if (editingTodo) {
         await updateDoc(doc(db, "todoList", editingTodo.id), {
           title: data.title,
           description: data.description,
           deadline: timestamp,
+          category: categoryId,
         });
       } else {
-        await addDoc(collection(db, "todoList"), {
+        const newTodoRef = await addDoc(collection(db, "todoList"), {
           title: data.title,
           description: data.description,
           done: false,
           deadline: timestamp,
+          category: categoryId,
+        });
+
+        // Update the category's tasks array
+        const categoryRef = doc(db, "category", categoryId);
+        await updateDoc(categoryRef, {
+          tasks: [
+            ...(categories.find((c) => c.id === categoryId)?.tasks || []),
+            newTodoRef.id,
+          ],
         });
       }
       await getTodos();
       form.reset();
       setDialogOpen(false);
       setEditingTodo(null);
+      setNewCategory("");
     } catch (error) {
       console.error("Error saving task: ", error);
     }
@@ -145,10 +185,21 @@ export default function TodoList() {
     }
   };
 
-  const deleteTodo = async (id) => {
+  const deleteTodo = async (id, categoryId) => {
     try {
       await deleteDoc(doc(db, "todoList", id));
+
+      // Remove the task from the category's tasks array
+      const categoryRef = doc(db, "category", categoryId);
+      const category = categories.find((c) => c.id === categoryId);
+      if (category) {
+        await updateDoc(categoryRef, {
+          tasks: category.tasks.filter((taskId) => taskId !== id),
+        });
+      }
+
       await getTodos();
+      await getCategories();
     } catch (error) {
       console.error("Error deleting todo:", error);
     }
@@ -160,6 +211,7 @@ export default function TodoList() {
       title: todo.title,
       description: todo.description,
       dob: todo.deadline,
+      category: todo.category,
     });
     setDialogOpen(true);
   };
@@ -183,15 +235,15 @@ export default function TodoList() {
     })
     .sort((a, b) => {
       if (sortOrder === "soonest") {
-        if (!a.deadline) return 1; // Move tasks without deadline to the end
+        if (!a.deadline) return 1;
         if (!b.deadline) return -1;
-        return new Date(a.deadline) - new Date(b.deadline); // Soonest deadlines first
+        return new Date(a.deadline) - new Date(b.deadline);
       } else if (sortOrder === "latest") {
-        if (!a.deadline) return 1; // Move tasks without deadline to the end
+        if (!a.deadline) return 1;
         if (!b.deadline) return -1;
-        return new Date(b.deadline) - new Date(a.deadline); // Latest deadlines first
+        return new Date(b.deadline) - new Date(a.deadline);
       }
-      return 0; // No sorting if none selected
+      return 0;
     });
 
   return (
@@ -292,6 +344,48 @@ export default function TodoList() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="new">
+                            Create new category
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {form.watch("category") === "new" && (
+                  <FormItem>
+                    <FormLabel>New Category Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                        placeholder="Enter new category name"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
                 <DialogFooter>
                   <Button type="submit">
                     {editingTodo ? "Update Task" : "Create Task"}
@@ -328,19 +422,16 @@ export default function TodoList() {
             <SelectItem value="notDone">On Going</SelectItem>
           </SelectContent>
         </Select>
-
-        {/* Sort dropdown for sorting by soonest or latest deadlines */}
         <Select value={sortOrder} onValueChange={setSortOrder}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Sort by deadline" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">No Sorting</SelectItem>
+            <SelectItem value="none">Default</SelectItem>
             <SelectItem value="soonest">Soonest</SelectItem>
             <SelectItem value="latest">Latest</SelectItem>
           </SelectContent>
         </Select>
-
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-[160px]">
@@ -372,7 +463,7 @@ export default function TodoList() {
                 <span
                   className={cn(
                     todo.done && "line-through",
-                    "overflow-hidden text-ellipsis w-full  pb-1"
+                    "overflow-hidden text-ellipsis w-full pb-1"
                   )}
                 >
                   {todo.title}
@@ -389,7 +480,13 @@ export default function TodoList() {
               <p className="text-sm text-muted-foreground">
                 {todo.description}
               </p>
+
+              <Badge variant="outline" className="h-fit w-fit mt-2 ">
+                {categories.find((c) => c.id === todo.category)?.name ||
+                  "No category"}
+              </Badge>
             </CardContent>
+
             <CardFooter className="flex justify-between">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -416,7 +513,7 @@ export default function TodoList() {
                 <Button
                   variant="destructive"
                   size="icon"
-                  onClick={() => deleteTodo(todo.id)}
+                  onClick={() => deleteTodo(todo.id, todo.category)}
                   disabled={todo.done}
                 >
                   <Trash2 className="h-4 w-4" />
