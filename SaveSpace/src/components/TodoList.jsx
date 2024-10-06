@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, Edit, Trash2, Plus, Search, Filter } from "lucide-react";
+import { CalendarIcon, Edit, Trash2, Plus, Search } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
@@ -75,6 +75,8 @@ export default function TodoList() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState(null);
+  const [sortOrder, setSortOrder] = useState("none");
+
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -162,22 +164,35 @@ export default function TodoList() {
     setDialogOpen(true);
   };
 
-  const filteredTodos = todos.filter((todo) => {
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "done" && todo.done) ||
-      (filter === "notDone" && !todo.done);
-    const matchesSearch = todo.title
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesDate =
-      !dateFilter ||
-      (todo.deadline &&
-        (isEqual(todo.deadline, dateFilter) ||
-          (isBefore(todo.deadline, dateFilter) &&
-            isAfter(todo.deadline, new Date()))));
-    return matchesFilter && matchesSearch && matchesDate;
-  });
+  const filteredTodos = todos
+    .filter((todo) => {
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "done" && todo.done) ||
+        (filter === "notDone" && !todo.done);
+      const matchesSearch = todo.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesDate =
+        !dateFilter ||
+        (todo.deadline &&
+          (isEqual(todo.deadline, dateFilter) ||
+            (isBefore(todo.deadline, dateFilter) &&
+              isAfter(todo.deadline, new Date()))));
+      return matchesFilter && matchesSearch && matchesDate;
+    })
+    .sort((a, b) => {
+      if (sortOrder === "soonest") {
+        if (!a.deadline) return 1; // Move tasks without deadline to the end
+        if (!b.deadline) return -1;
+        return new Date(a.deadline) - new Date(b.deadline); // Soonest deadlines first
+      } else if (sortOrder === "latest") {
+        if (!a.deadline) return 1; // Move tasks without deadline to the end
+        if (!b.deadline) return -1;
+        return new Date(b.deadline) - new Date(a.deadline); // Latest deadlines first
+      }
+      return 0; // No sorting if none selected
+    });
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -304,7 +319,7 @@ export default function TodoList() {
           </div>
         </div>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Filter tasks" />
           </SelectTrigger>
           <SelectContent>
@@ -313,6 +328,19 @@ export default function TodoList() {
             <SelectItem value="notDone">On Going</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Sort dropdown for sorting by soonest or latest deadlines */}
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder="Sort by deadline" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No Sorting</SelectItem>
+            <SelectItem value="soonest">Soonest</SelectItem>
+            <SelectItem value="latest">Latest</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-[180px]">
