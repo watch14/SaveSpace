@@ -19,8 +19,7 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+
   min-width: 320px;
   max-width: 1920px;
   min-height: 100vh;
@@ -104,5 +103,11 @@ h3 {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 2000px;
   }
 }
