@@ -145,13 +145,7 @@ export default function CreateTask({ onTaskCreated }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <a
-          href="#"
-          className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-        >
-          <Plus className="h-4 w-4 transition-all group-hover:scale-110" />
-          <span className="sr-only">Acme Inc</span>
-        </a>
+        <Button>Create Task</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] overflow-scroll w-[600px] max-h-[80%]">
         <DialogHeader>

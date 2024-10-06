@@ -37,7 +37,7 @@ import { SignOut } from "@/utils/SignOut";
 import { Button } from "./ui/button";
 import Loading from "./ui/loader";
 import { ModeToggle } from "./ui/ThemeToggle";
-import CreateTask from "./CreateTask";
+import { Create } from "./Create";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);
@@ -98,7 +98,7 @@ export function Aside() {
             <Plus className="h-4 w-4 transition-all group-hover:scale-110" />
             <span className="sr-only">Acme Inc</span>
           </a>
-          <CreateTask />
+          <Create />
           <Tooltip>
             <TooltipTrigger asChild>
               <a
