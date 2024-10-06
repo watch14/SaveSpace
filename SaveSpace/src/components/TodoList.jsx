@@ -114,7 +114,8 @@ export default function TodoList() {
         .filter(
           (todo) =>
             todo.createdBy === currentUser.uid ||
-            (todo.collaborators && todo.collaborators.includes(currentUser.uid))
+            (todo.collaborators &&
+              todo.collaborators.includes(currentUser.email))
         );
       setTodos(userFilteredData);
     } catch (error) {
@@ -587,12 +588,17 @@ export default function TodoList() {
                   "No category"}
               </Badge>
 
-              {/* Display Collaborators */}
-              <Badge className="mt-2 text-sm text-muted-foreground">
-                {todo.collaborators && todo.collaborators.length > 0
-                  ? todo.collaborators.join(", ")
-                  : "No collaborators"}
-              </Badge>
+              {/* Display Collaborators  if its no empty or ist create by the user*/}
+
+              {todo.collaborators &&
+                todo.collaborators.length > 0 &&
+                todo.createdBy === currentUser.uid && (
+                  <Badge className="mt-2 text-sm text-muted-foreground">
+                    {todo.collaborators && todo.collaborators.length > 0
+                      ? todo.collaborators.join(", ")
+                      : "No collaborators"}
+                  </Badge>
+                )}
             </CardContent>
 
             <CardFooter className="flex justify-between">
