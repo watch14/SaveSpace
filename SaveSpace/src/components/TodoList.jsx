@@ -609,29 +609,26 @@ export default function TodoList() {
 
               {/* Display Collaborators if created by the user and there are collaborators */}
               {todo.collaborators?.length > 0 && (
-                <div className="flex flex-wrap mt-2">
-                  {/* Show "Owner" badge if the current user is the owner */}
+                <div className="flex flex-wrap w-fit h-fit mt-2 justify-end  ">
                   {todo.createdBy === currentUser.uid && (
                     <Badge
                       variant="secondary"
-                      className="text-muted-foreground h-fit w-fit mr-2 mb-2"
+                      className="text-muted-foreground h-[20px] w-fit mr-2 mt-auto text-center"
                     >
                       Owner
                     </Badge>
                   )}
 
                   {todo.collaborators.map((collaborator, index) => {
-                    // Check if the collaborator is the current user
                     const isCurrentUser = collaborator === currentUser.email;
 
                     return (
-                      <div key={index} className="mr-2 mb-2">
+                      <div key={index} className=" mr-2">
                         <Badge
                           variant="secondary"
-                          className="text-muted-foreground h-fit w-fit"
+                          className="text-muted-foreground h-[20px] w-fit"
                         >
                           {isCurrentUser ? "You" : collaborator}
-                          {/* Display "You" for current user */}
                         </Badge>
                       </div>
                     );
