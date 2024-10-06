@@ -615,16 +615,18 @@ export default function TodoList() {
 
                   {todo.collaborators.map((collaborator, index) => {
                     // Check if the collaborator is the current user
-                    const isCurrentUser = collaborator === currentUser.uid;
+                    const isCurrentUser = collaborator === currentUser.email;
 
                     return (
-                      <Badge
-                        key={index} // Use a unique key for each Badge
-                        variant="secondary"
-                        className="text-muted-foreground h-fit w-fit mr-2 mb-2"
-                      >
-                        {isCurrentUser ? "You" : collaborator}{" "}
-                      </Badge>
+                      <div key={index} className="mr-2 mb-2">
+                        <Badge
+                          variant="secondary"
+                          className="text-muted-foreground h-fit w-fit"
+                        >
+                          {isCurrentUser ? "You" : collaborator}{" "}
+                          {/* Display "You" for current user */}
+                        </Badge>
+                      </div>
                     );
                   })}
                 </div>
