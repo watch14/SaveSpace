@@ -154,7 +154,7 @@ export function Aside() {
                     <Avatar>
                       <AvatarImage src={userPic} />
                       <AvatarFallback>
-                        <img src="https://github.com/shadcn.png" alt="PIC" />
+                        <User />
                       </AvatarFallback>
                     </Avatar>
                     <p className=" text-secondary-foreground">{userName}</p>
