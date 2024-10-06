@@ -264,7 +264,7 @@ export default function TodoList() {
               <Plus className="mr-2 h-4 w-4" /> Create Task
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] overflow-scroll w-[600px] max-h-[80%]">
             <DialogHeader>
               <DialogTitle>
                 {editingTodo ? "Edit Task" : "Create Task"}

@@ -25,6 +25,7 @@ import { auth } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import getUser, { isUserLoggedIn } from "@/utils/getuser";
 import { useAuth } from "@/context/AuthContext"; // Import the useAuth hook
+import CreateTask from "./CreateTask.jsx";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -97,6 +98,7 @@ export function Aside() {
             <Plus className="h-4 w-4 transition-all group-hover:scale-110" />
             <span className="sr-only">Acme Inc</span>
           </a>
+          <CreateTask />
           <Tooltip>
             <TooltipTrigger asChild>
               <a
