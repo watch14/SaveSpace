@@ -481,7 +481,7 @@ export default function TodoList() {
             key={todo.id}
             className={cn(
               todo.done && "opacity-60",
-              "flex flex-col justify-between"
+              "flex flex-col justify-between "
             )}
           >
             <CardHeader>
