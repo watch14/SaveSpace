@@ -400,20 +400,18 @@ export default function TodoList() {
         </Dialog>
       </div>
       <div className="mb-6 grid flex-col sm:flex-row gap-4 w-full">
-        <div className="">
-          <Label htmlFor="search" className="sr-only">
-            Search
-          </Label>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="Search tasks..."
-              className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+        <Label htmlFor="search" className="sr-only">
+          Search
+        </Label>
+        <div className="relative">
+          <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="search"
+            placeholder="Search tasks..."
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <Select value={filter} onValueChange={setFilter}>
