@@ -73,6 +73,7 @@ const FormSchema = z.object({
 
 export default function TodoList() {
   const { currentUser } = useAuth();
+
   const [todos, setTodos] = useState([]);
   const [categories, setCategories] = useState([]);
   const [userCategories, setUserCategories] = useState([]);
@@ -599,20 +600,35 @@ export default function TodoList() {
                   "No category"}
               </Badge>
 
-              {/* Display Collaborators  if its no empty or ist create by the user*/}
+              {/* Display Collaborators if created by the user and there are collaborators */}
+              {todo.collaborators?.length > 0 && (
+                <div className="flex flex-wrap mt-2">
+                  {/* Show "Owner" badge if the current user is the owner */}
+                  {todo.createdBy === currentUser.uid && (
+                    <Badge
+                      variant="secondary"
+                      className="text-muted-foreground h-fit w-fit mr-2 mb-2"
+                    >
+                      Owner
+                    </Badge>
+                  )}
 
-              {todo.collaborators &&
-                todo.collaborators.length > 0 &&
-                todo.createdBy === currentUser.uid && (
-                  <Badge
-                    variant="secondary"
-                    className="text-muted-foreground h-fit w-fit mt-2"
-                  >
-                    {todo.collaborators && todo.collaborators.length > 0
-                      ? todo.collaborators.join(", ")
-                      : "No collaborators"}
-                  </Badge>
-                )}
+                  {todo.collaborators.map((collaborator, index) => {
+                    // Check if the collaborator is the current user
+                    const isCurrentUser = collaborator === currentUser.uid;
+
+                    return (
+                      <Badge
+                        key={index} // Use a unique key for each Badge
+                        variant="secondary"
+                        className="text-muted-foreground h-fit w-fit mr-2 mb-2"
+                      >
+                        {isCurrentUser ? "You" : collaborator}{" "}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
 
             <CardFooter className="flex justify-between">
