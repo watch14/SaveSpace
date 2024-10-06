@@ -319,7 +319,7 @@ export default function TodoList() {
           </div>
         </div>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Filter tasks" />
           </SelectTrigger>
           <SelectContent>
@@ -331,7 +331,7 @@ export default function TodoList() {
 
         {/* Sort dropdown for sorting by soonest or latest deadlines */}
         <Select value={sortOrder} onValueChange={setSortOrder}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Sort by deadline" />
           </SelectTrigger>
           <SelectContent>
@@ -343,7 +343,7 @@ export default function TodoList() {
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[180px]">
+            <Button variant="outline" className="w-[160px]">
               <CalendarIcon className="mr-2 h-4 w-4" />
               {dateFilter ? format(dateFilter, "PPP") : "Filter by date"}
             </Button>
