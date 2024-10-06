@@ -593,7 +593,10 @@ export default function TodoList() {
               {todo.collaborators &&
                 todo.collaborators.length > 0 &&
                 todo.createdBy === currentUser.uid && (
-                  <Badge className="mt-2 text-sm text-muted-foreground">
+                  <Badge
+                    variant="secondary"
+                    className="text-muted-foreground h-fit w-fit mt-2"
+                  >
                     {todo.collaborators && todo.collaborators.length > 0
                       ? todo.collaborators.join(", ")
                       : "No collaborators"}
