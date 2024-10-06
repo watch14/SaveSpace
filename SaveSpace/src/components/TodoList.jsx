@@ -421,7 +421,7 @@ export default function TodoList() {
               <SelectValue placeholder="Filter tasks" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">All Tasks</SelectItem>
               <SelectItem value="done">Done</SelectItem>
               <SelectItem value="notDone">On Going</SelectItem>
             </SelectContent>
@@ -447,7 +447,7 @@ export default function TodoList() {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>All</SelectItem>
+              <SelectItem value={null}>All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -502,7 +502,7 @@ export default function TodoList() {
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-full flex flex-col justify-between items-start text-left">
               <p className="text-sm text-muted-foreground">
                 {todo.description}
               </p>
@@ -524,7 +524,7 @@ export default function TodoList() {
                   htmlFor={`todo-${todo.id}`}
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {todo.done ? "Completed" : "Mark as complete"}
+                  {todo.done ? "Done!" : "Mark as Done!"}
                 </label>
               </div>
               <div className="flex space-x-2">
