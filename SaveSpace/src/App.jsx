@@ -9,7 +9,7 @@ function App() {
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Aside />
-        <div className="ml-[56px]">
+        <div className="ml-[56px] ">
           <Outlet />
         </div>
       </ThemeProvider>

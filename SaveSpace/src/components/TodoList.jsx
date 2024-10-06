@@ -305,7 +305,7 @@ export default function TodoList() {
     });
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="container mx-auto p-4 w-full ">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Todo List</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -493,7 +493,7 @@ export default function TodoList() {
         <Label htmlFor="search" className="sr-only">
           Search
         </Label>
-        <div className="relative">
+        <div className="relative w-full">
           <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             id="search"
@@ -563,13 +563,20 @@ export default function TodoList() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* if there is no todo */}
+      {filteredTodos.length === 0 && (
+        <div className="flex justify-center items-center h-96">
+          <p className="text-lg text-muted-foreground">No tasks found.</p>
+        </div>
+      )}
+
+      <div className="grid gap-4 grid-flow-row wrap md:grid-cols-2 lg:grid-cols-4">
         {filteredTodos.map((todo) => (
           <Card
             key={todo.id}
             className={cn(
               todo.done && "opacity-60",
-              "flex flex-col justify-between "
+              "flex flex-col justify-between w-full"
             )}
           >
             <CardHeader>
