@@ -570,7 +570,7 @@ export default function TodoList() {
         </div>
       )}
 
-      <div className="grid gap-4 grid-flow-row wrap md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-flow-row wrap md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {filteredTodos.map((todo) => (
           <Card
             key={todo.id}
@@ -609,7 +609,7 @@ export default function TodoList() {
 
               {/* Display Collaborators if created by the user and there are collaborators */}
               {todo.collaborators?.length > 0 && (
-                <div className="flex flex-wrap w-fit h-fit mt-2 justify-end  ">
+                <div className="flex flex-wrap w-fit h-fit mt-2">
                   {todo.createdBy === currentUser.uid && (
                     <Badge
                       variant="secondary"
