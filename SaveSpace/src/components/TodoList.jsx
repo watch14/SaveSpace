@@ -68,6 +68,7 @@ const FormSchema = z.object({
   description: z.string().optional(),
   dob: z.date().optional(),
   category: z.string().min(1, "Category is required."),
+  collaborators: z.array(z.string()).optional(), // Add this line
 });
 
 export default function TodoList() {
@@ -448,9 +449,14 @@ export default function TodoList() {
                       <FormControl>
                         <Input
                           {...field}
-                          value={field.value || ""}
-                          onChange={(e) =>
-                            field.onChange(e.target.value.split(","))
+                          value={(field.value || []).join(",")} // Join array back to string for display
+                          onChange={
+                            (e) =>
+                              field.onChange(
+                                e.target.value
+                                  .split(",")
+                                  .map((email) => email.trim())
+                              ) // Split and trim
                           }
                           placeholder="Enter comma-separated emails of collaborators"
                         />
