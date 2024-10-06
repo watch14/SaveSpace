@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "../config/firebase";
 import {
   doc,
-  setDoc,
+  getDoc,
   getDocs,
   collection,
   Timestamp,
@@ -168,15 +168,26 @@ export default function TodoList() {
       }
 
       // Prepare collaborators list
-      const collaboratorsList = data.collaborators || [];
+      const newCollaboratorsList = data.collaborators || [];
 
       if (editingTodo) {
-        await updateDoc(doc(db, "todoList", editingTodo.id), {
+        const todoRef = doc(db, "todoList", editingTodo.id);
+        const todoDoc = await getDoc(todoRef);
+
+        // Merge existing collaborators with new collaborators
+        const existingCollaborators = todoDoc.exists()
+          ? todoDoc.data().collaborators || []
+          : [];
+        const updatedCollaborators = Array.from(
+          new Set([...existingCollaborators, ...newCollaboratorsList])
+        );
+
+        await updateDoc(todoRef, {
           title: data.title,
           description: data.description,
           deadline: timestamp,
           category: categoryId,
-          collaborators: collaboratorsList, // Update collaborators here
+          collaborators: updatedCollaborators, // Update collaborators here
         });
       } else {
         const newTodoRef = await addDoc(collection(db, "todoList"), {
@@ -186,7 +197,7 @@ export default function TodoList() {
           deadline: timestamp,
           category: categoryId,
           createdBy: userId,
-          collaborators: collaboratorsList, // Set collaborators when creating a new todo
+          collaborators: newCollaboratorsList, // Set collaborators when creating a new todo
         });
 
         const categoryRef = doc(db, "category", categoryId);
