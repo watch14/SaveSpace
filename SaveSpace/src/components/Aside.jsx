@@ -25,7 +25,6 @@ import { auth } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import getUser, { isUserLoggedIn } from "@/utils/getuser";
 import { useAuth } from "@/context/AuthContext"; // Import the useAuth hook
-import CreateTask from "./CreateTask.jsx";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -38,6 +37,7 @@ import { SignOut } from "@/utils/SignOut";
 import { Button } from "./ui/button";
 import Loading from "./ui/loader";
 import { ModeToggle } from "./ui/ThemeToggle";
+import CreateTask from "./CreateTask";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);

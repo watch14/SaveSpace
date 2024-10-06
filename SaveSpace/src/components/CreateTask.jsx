@@ -1,33 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { db } from "../config/firebase";
 import {
-  doc,
-  setDoc,
-  getDocs,
   collection,
-  Timestamp,
   addDoc,
-  deleteDoc,
   updateDoc,
+  doc,
+  Timestamp,
 } from "firebase/firestore";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, Plus } from "lucide-react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Label } from "@/components/ui/label";
+
 import {
   Form,
   FormControl,
@@ -36,12 +36,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+
 import {
   Select,
   SelectContent,
@@ -49,27 +44,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, isBefore } from "date-fns";
 
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+
+// Define the form schema using Zod
 const FormSchema = z.object({
   title: z.string().min(1, "Task title is required."),
   description: z.string().optional(),
   dob: z.date().optional(),
   category: z.string().min(1, "Category is required."),
+  collaborators: z.array(z.string()).optional(),
 });
 
-export default function CreateTask({ editingTodo = null }) {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
+export default function CreateTask({ onTaskCreated }) {
+  const { currentUser } = useAuth();
   const [newCategory, setNewCategory] = useState("");
-
+  const [categories, setCategories] = useState([]); // Assume you will set categories based on user context
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      title: editingTodo ? editingTodo.title : "",
-      description: editingTodo ? editingTodo.description : "",
-      dob: editingTodo ? editingTodo.deadline : undefined,
-      category: editingTodo ? editingTodo.category : "",
+      title: "",
+      description: "",
+      dob: undefined,
+      category: "",
     },
   });
 
@@ -80,80 +87,77 @@ export default function CreateTask({ editingTodo = null }) {
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Filter categories to include only those created by the current user
+      const userFilteredCategories = categoryData.filter(
+        (category) => category.createdBy === currentUser.uid
+      );
+
       setCategories(categoryData);
+      setCategories(userFilteredCategories); // Set user-specific categories
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
-
-  useEffect(() => {
-    getCategories();
-  }, []);
-
-  async function onSubmit(data) {
+  // Handle form submission
+  const onSubmit = async (data) => {
     const timestamp = data.dob ? Timestamp.fromDate(data.dob) : null;
+    const userId = currentUser.uid;
+
     try {
       let categoryId = data.category;
+
+      // Handle new category creation
       if (data.category === "new" && newCategory.trim() !== "") {
         const newCategoryRef = await addDoc(collection(db, "category"), {
           name: newCategory,
+          createdBy: userId,
+          collaborators: [],
           tasks: [],
         });
         categoryId = newCategoryRef.id;
-        await getCategories();
+        // Optionally refresh the category list
+        getCategories();
       }
 
-      if (editingTodo) {
-        await updateDoc(doc(db, "todoList", editingTodo.id), {
-          title: data.title,
-          description: data.description,
-          deadline: timestamp,
-          category: categoryId,
-        });
-      } else {
-        const newTodoRef = await addDoc(collection(db, "todoList"), {
-          title: data.title,
-          description: data.description,
-          done: false,
-          deadline: timestamp,
-          category: categoryId,
-        });
+      // Create new task in Firestore
+      await addDoc(collection(db, "todoList"), {
+        title: data.title,
+        description: data.description,
+        done: false,
+        deadline: timestamp,
+        category: categoryId,
+        createdBy: userId,
+        collaborators: data.collaborators || [],
+      });
 
-        // Update the category's tasks array
-        const categoryRef = doc(db, "category", categoryId);
-        await updateDoc(categoryRef, {
-          tasks: [
-            ...(categories.find((c) => c.id === categoryId)?.tasks || []),
-            newTodoRef.id,
-          ],
-        });
-      }
+      // Reset form and optionally trigger a callback to update the parent component
       form.reset();
-      setDialogOpen(false);
       setNewCategory("");
+      if (onTaskCreated) {
+        onTaskCreated(); // Trigger parent callback
+      }
     } catch (error) {
-      console.error("Error saving task: ", error);
+      console.error("Error creating task: ", error);
     }
-  }
+  };
+
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Dialog>
       <DialogTrigger asChild>
-        <Button
-          onClick={() => {
-            setDialogOpen(true);
-          }}
+        <a
+          href="#"
+          className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
         >
-          <Plus className="mr-2 h-4 w-4" />{" "}
-          {editingTodo ? "Edit Task" : "Create Task"}
-        </Button>
+          <Plus className="h-4 w-4 transition-all group-hover:scale-110" />
+          <span className="sr-only">Acme Inc</span>
+        </a>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] overflow-scroll w-[600px] max-h-[80%]">
         <DialogHeader>
-          <DialogTitle>{editingTodo ? "Edit Task" : "Create Task"}</DialogTitle>
+          <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>
-            {editingTodo
-              ? "Edit your todo item below."
-              : "Add a new todo item below."}
+            Make changes to your profile here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -163,7 +167,7 @@ export default function CreateTask({ editingTodo = null }) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Task</FormLabel>
+                  <FormLabel>Task Title</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -195,7 +199,10 @@ export default function CreateTask({ editingTodo = null }) {
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          className="w-[240px] pl-3 text-left font-normal"
+                          className={cn(
+                            "w-[240px] pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
                         >
                           {field.value ? (
                             format(field.value, "PPP")
@@ -228,44 +235,75 @@ export default function CreateTask({ editingTodo = null }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} defaultValue="">
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="new">Create new category</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="new">Add new category</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             {form.watch("category") === "new" && (
-              <FormItem>
-                <FormLabel>New Category Name</FormLabel>
-                <FormControl>
-                  <Input
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Enter new category name"
-                  />
-                </FormControl>
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="newCategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Category Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-            <DialogFooter>
-              <Button type="submit">
-                {editingTodo ? "Update Task" : "Create Task"}
-              </Button>
-            </DialogFooter>
+
+            <FormField
+              control={form.control}
+              name="collaborators"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Collaborators (User Emails)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={(field.value || []).join(",")} // Join array back to string for display
+                      onChange={
+                        (e) =>
+                          field.onChange(
+                            e.target.value
+                              .split(",")
+                              .map((email) => email.trim())
+                          ) // Split and trim
+                      }
+                      placeholder="Enter comma-separated emails of collaborators"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Create Task</Button>
           </form>
         </Form>
+        <DialogFooter></DialogFooter>
       </DialogContent>
     </Dialog>
   );

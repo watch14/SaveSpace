@@ -623,7 +623,7 @@ export default function TodoList() {
                           variant="secondary"
                           className="text-muted-foreground h-fit w-fit"
                         >
-                          {isCurrentUser ? "You" : collaborator}{" "}
+                          {isCurrentUser ? "You" : collaborator}
                           {/* Display "You" for current user */}
                         </Badge>
                       </div>
