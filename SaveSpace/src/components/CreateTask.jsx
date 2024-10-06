@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { db } from "../config/firebase";
 import {
   collection,
   addDoc,
+  getDocs,
   updateDoc,
   doc,
   Timestamp,
@@ -68,6 +69,8 @@ const FormSchema = z.object({
 
 export default function CreateTask({ onTaskCreated }) {
   const { currentUser } = useAuth();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const [newCategory, setNewCategory] = useState("");
   const [categories, setCategories] = useState([]); // Assume you will set categories based on user context
   const form = useForm({
@@ -99,6 +102,11 @@ export default function CreateTask({ onTaskCreated }) {
       console.error("Error fetching categories:", error);
     }
   };
+
+  useEffect(() => {
+    getCategories();
+  }, []);
+
   // Handle form submission
   const onSubmit = async (data) => {
     const timestamp = data.dob ? Timestamp.fromDate(data.dob) : null;
@@ -117,7 +125,8 @@ export default function CreateTask({ onTaskCreated }) {
         });
         categoryId = newCategoryRef.id;
         // Optionally refresh the category list
-        getCategories();
+        await getCategories();
+        setDialogOpen(false);
       }
 
       // Create new task in Firestore
