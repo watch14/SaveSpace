@@ -131,7 +131,7 @@ export default function TodoList() {
 
       // Filter categories to include only those created by the current user
       const userFilteredCategories = categoryData.filter(
-        (category) => category.owner === currentUser.uid
+        (category) => category.createdBy === currentUser.uid
       );
 
       setCategories(categoryData);
@@ -148,20 +148,25 @@ export default function TodoList() {
 
   async function onSubmit(data) {
     const timestamp = data.dob ? Timestamp.fromDate(data.dob) : null;
-    const userId = currentUser.uid; // Assuming you have authentication set up and Firebase auth imported
+    const userId = currentUser.uid;
 
     try {
       let categoryId = data.category;
+
+      // Handle new category creation
       if (data.category === "new" && newCategory.trim() !== "") {
         const newCategoryRef = await addDoc(collection(db, "category"), {
           name: newCategory,
-          createdBy: userId, // Save the owner as the current user
-          collaborators: [], // Optionally, an array of collaborators
+          createdBy: userId,
+          collaborators: [],
           tasks: [],
         });
         categoryId = newCategoryRef.id;
         await getCategories();
       }
+
+      // Prepare collaborators list
+      const collaboratorsList = data.collaborators || [];
 
       if (editingTodo) {
         await updateDoc(doc(db, "todoList", editingTodo.id), {
@@ -169,7 +174,7 @@ export default function TodoList() {
           description: data.description,
           deadline: timestamp,
           category: categoryId,
-          collaborators: editingTodo.collaborators || [], // Ensure collaborators are not overwritten
+          collaborators: collaboratorsList, // Update collaborators here
         });
       } else {
         const newTodoRef = await addDoc(collection(db, "todoList"), {
@@ -178,11 +183,10 @@ export default function TodoList() {
           done: false,
           deadline: timestamp,
           category: categoryId,
-          createdBy: userId, // Save the current user as the owner
-          collaborators: [], // You can add collaborators here
+          createdBy: userId,
+          collaborators: collaboratorsList, // Set collaborators when creating a new todo
         });
 
-        // Update the category's tasks array
         const categoryRef = doc(db, "category", categoryId);
         await updateDoc(categoryRef, {
           tasks: [
@@ -191,6 +195,7 @@ export default function TodoList() {
           ],
         });
       }
+
       await getTodos();
       form.reset();
       setDialogOpen(false);
@@ -575,6 +580,16 @@ export default function TodoList() {
                 {categories.find((c) => c.id === todo.category)?.name ||
                   "No category"}
               </Badge>
+
+              {/* Display Collaborators */}
+              <div className="mt-2">
+                <h4 className="font-medium">Collaborators:</h4>
+                <p className="text-sm text-muted-foreground">
+                  {todo.collaborators && todo.collaborators.length > 0
+                    ? todo.collaborators.join(", ")
+                    : "No collaborators"}
+                </p>
+              </div>
             </CardContent>
 
             <CardFooter className="flex justify-between">
