@@ -61,6 +61,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/context/AuthContext";
 
 const FormSchema = z.object({
   title: z.string().min(1, "Task title is required."),
@@ -70,8 +71,11 @@ const FormSchema = z.object({
 });
 
 export default function TodoList() {
+  const { currentUser } = useAuth();
   const [todos, setTodos] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [userCategories, setUserCategories] = useState([]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -94,18 +98,24 @@ export default function TodoList() {
   const getTodos = async () => {
     try {
       const data = await getDocs(collection(db, "todoList"));
-      const filteredData = data.docs.map((doc) => {
-        const data = doc.data();
-        const deadline = data.deadline
-          ? new Date(data.deadline.seconds * 1000)
-          : null;
-        return {
-          id: doc.id,
-          ...data,
-          deadline,
-        };
-      });
-      setTodos(filteredData);
+      const userFilteredData = data.docs
+        .map((doc) => {
+          const data = doc.data();
+          const deadline = data.deadline
+            ? new Date(data.deadline.seconds * 1000)
+            : null;
+          return {
+            id: doc.id,
+            ...data,
+            deadline,
+          };
+        })
+        .filter(
+          (todo) =>
+            todo.createdBy === currentUser.uid ||
+            (todo.collaborators && todo.collaborators.includes(currentUser.uid))
+        );
+      setTodos(userFilteredData);
     } catch (error) {
       console.error("Error fetching todos:", error);
     }
@@ -118,7 +128,14 @@ export default function TodoList() {
         id: doc.id,
         ...doc.data(),
       }));
+
+      // Filter categories to include only those created by the current user
+      const userFilteredCategories = categoryData.filter(
+        (category) => category.owner === currentUser.uid
+      );
+
       setCategories(categoryData);
+      setUserCategories(userFilteredCategories); // Set user-specific categories
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -131,11 +148,15 @@ export default function TodoList() {
 
   async function onSubmit(data) {
     const timestamp = data.dob ? Timestamp.fromDate(data.dob) : null;
+    const userId = currentUser.uid; // Assuming you have authentication set up and Firebase auth imported
+
     try {
       let categoryId = data.category;
       if (data.category === "new" && newCategory.trim() !== "") {
         const newCategoryRef = await addDoc(collection(db, "category"), {
           name: newCategory,
+          createdBy: userId, // Save the owner as the current user
+          collaborators: [], // Optionally, an array of collaborators
           tasks: [],
         });
         categoryId = newCategoryRef.id;
@@ -148,6 +169,7 @@ export default function TodoList() {
           description: data.description,
           deadline: timestamp,
           category: categoryId,
+          collaborators: editingTodo.collaborators || [], // Ensure collaborators are not overwritten
         });
       } else {
         const newTodoRef = await addDoc(collection(db, "todoList"), {
@@ -156,6 +178,8 @@ export default function TodoList() {
           done: false,
           deadline: timestamp,
           category: categoryId,
+          createdBy: userId, // Save the current user as the owner
+          collaborators: [], // You can add collaborators here
         });
 
         // Update the category's tasks array
@@ -215,6 +239,18 @@ export default function TodoList() {
       category: todo.category,
     });
     setDialogOpen(true);
+  };
+
+  const addCollaborator = async (taskId, collaboratorId) => {
+    try {
+      const todoRef = doc(db, "todoList", taskId);
+      await updateDoc(todoRef, {
+        collaborators: arrayUnion(collaboratorId), // Add collaborator to the array
+      });
+      await getTodos();
+    } catch (error) {
+      console.error("Error adding collaborator:", error);
+    }
   };
 
   const filteredTodos = todos
@@ -353,42 +389,72 @@ export default function TodoList() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={editingTodo?.category}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
+                          <SelectContent>
+                            {userCategories.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="new">
+                              Add new category
                             </SelectItem>
-                          ))}
-                          <SelectItem value="new">
-                            Create new category
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 {form.watch("category") === "new" && (
-                  <FormItem>
-                    <FormLabel>New Category Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={newCategory}
-                        onChange={(e) => setNewCategory(e.target.value)}
-                        placeholder="Enter new category name"
-                      />
-                    </FormControl>
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="newCategory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Category Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
+
+                <FormField
+                  control={form.control}
+                  name="collaborators"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Collaborators (User Emails)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(e.target.value.split(","))
+                          }
+                          placeholder="Enter comma-separated emails of collaborators"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <DialogFooter>
                   <Button type="submit">
                     {editingTodo ? "Update Task" : "Create Task"}
@@ -530,7 +596,7 @@ export default function TodoList() {
                   variant="outline"
                   size="icon"
                   onClick={() => editTodo(todo)}
-                  disabled={todo.done}
+                  disabled={todo.done || todo.createdBy !== currentUser.uid} // Disable if not the creator
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -538,7 +604,7 @@ export default function TodoList() {
                   variant="destructive"
                   size="icon"
                   onClick={() => deleteTodo(todo.id, todo.category)}
-                  disabled={todo.done}
+                  disabled={todo.done || todo.createdBy !== currentUser.uid} // Disable if not the creator
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
