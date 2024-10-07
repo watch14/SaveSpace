@@ -205,7 +205,7 @@ export default function Category() {
                           className="ml-2  "
                         />
                       ) : (
-                        <span className="truncate text-left w-full h-full pb-1 ">
+                        <span className="truncate text-left w-[222.45px] h-full pb-1 ">
                           {category.name}
                         </span>
                       )}

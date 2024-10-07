@@ -176,22 +176,57 @@ export default function TodoList() {
         const todoRef = doc(db, "todoList", editingTodo.id);
         const todoDoc = await getDoc(todoRef);
 
-        // Merge existing collaborators with new collaborators
-        const existingCollaborators = todoDoc.exists()
-          ? todoDoc.data().collaborators || []
-          : [];
-        const updatedCollaborators = Array.from(
-          new Set([...existingCollaborators, ...newCollaboratorsList])
-        );
+        if (todoDoc.exists()) {
+          const existingCollaborators = todoDoc.data().collaborators || [];
+          const updatedCollaborators = Array.from(
+            new Set([...existingCollaborators, ...newCollaboratorsList])
+          );
 
-        await updateDoc(todoRef, {
-          title: data.title,
-          description: data.description,
-          deadline: timestamp,
-          category: categoryId,
-          collaborators: updatedCollaborators,
-        });
+          // Check if the category has changed
+          const oldCategoryId = todoDoc.data().category;
+          if (oldCategoryId && oldCategoryId !== categoryId) {
+            // Remove the task ID from the old category
+            const oldCategoryRef = doc(db, "category", oldCategoryId);
+            const oldCategoryDoc = await getDoc(oldCategoryRef);
+
+            if (oldCategoryDoc.exists()) {
+              const oldTasks = oldCategoryDoc.data().tasks || [];
+              const updatedOldTasks = oldTasks.filter(
+                (taskId) => taskId !== editingTodo.id
+              );
+
+              await updateDoc(oldCategoryRef, {
+                tasks: updatedOldTasks,
+              });
+            }
+          }
+
+          // Update the todo with the new data
+          await updateDoc(todoRef, {
+            title: data.title,
+            description: data.description,
+            deadline: timestamp,
+            category: categoryId,
+            collaborators: updatedCollaborators,
+          });
+
+          // Update the new category to include the task ID if it's not already present
+          const newCategoryRef = doc(db, "category", categoryId);
+          const newCategoryDoc = await getDoc(newCategoryRef);
+
+          if (newCategoryDoc.exists()) {
+            const newTasks = newCategoryDoc.data().tasks || [];
+
+            // Check if the task ID is already in the category's task list
+            if (!newTasks.includes(editingTodo.id)) {
+              await updateDoc(newCategoryRef, {
+                tasks: [...newTasks, editingTodo.id],
+              });
+            }
+          }
+        }
       } else {
+        // If adding a new task
         const newTodoRef = await addDoc(collection(db, "todoList"), {
           title: data.title,
           description: data.description,
@@ -203,11 +238,13 @@ export default function TodoList() {
         });
 
         const categoryRef = doc(db, "category", categoryId);
+        const categoryDoc = await getDoc(categoryRef);
+        const currentTasks = categoryDoc.exists()
+          ? categoryDoc.data().tasks || []
+          : [];
+
         await updateDoc(categoryRef, {
-          tasks: [
-            ...(categories.find((c) => c.id === categoryId)?.tasks || []),
-            newTodoRef.id,
-          ],
+          tasks: [...currentTasks, newTodoRef.id],
         });
       }
 
@@ -217,7 +254,7 @@ export default function TodoList() {
       setEditingTodo(null);
       setNewCategory("");
     } catch (error) {
-      console.error("Error saving task: ", error);
+      console.error("Error submitting todo: ", error);
     }
   }
 
@@ -655,7 +692,7 @@ export default function TodoList() {
                   {todo.done ? "Done!" : "Mark as Done!"}
                 </label>
               </div>
-              <div className="flex ">
+              <div className="flex space-x-2">
                 <Button
                   variant="outline"
                   size="icon"
