@@ -120,121 +120,137 @@ export default function Category() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Categories</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Create Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Category</DialogTitle>
-              <DialogDescription>
-                Create a category to organize your Space.
-              </DialogDescription>
-            </DialogHeader>
+    <div className="w-full min-h-screen bg-background">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Categories</h1>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> Create Category
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create Category</DialogTitle>
+                <DialogDescription>
+                  <p>
+                    Create a category to organize your Space.
+                    <br />
+                    (Try to keep the category title simple and short).
+                  </p>
+                </DialogDescription>
+              </DialogHeader>
+              <Input
+                type="text"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                placeholder="Category title"
+              />
+              <DialogFooter>
+                <Button type="submit" onClick={createCategory}>
+                  Create Category
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="Category title"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
             />
-            <DialogFooter>
-              <Button type="submit" onClick={createCategory}>
-                Create
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search categories..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+          </div>
         </div>
-      </div>
 
-      {filteredCategories.length > 0 ? (
-        <div className="grid gap-4 grid-flow-row wrap sm:grid-cols-2  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {filteredCategories.map((category) => (
-            <Card key={category.id} className="flex flex-col w-full">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Folder className="mr-2 h-5 w-5 text-primary" />
-                  {editingCategory === category.id ? (
-                    <Input
-                      type="text"
-                      value={category.name}
-                      onChange={(e) => {
-                        const updatedCategories = userCategories.map((c) =>
-                          c.id === category.id
-                            ? { ...c, name: e.target.value }
-                            : c
-                        );
-                        setUserCategories(updatedCategories);
-                      }}
-                      className="ml-2 w-full"
-                    />
-                  ) : (
-                    category.name
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <p className="text-sm text-gray-500">
-                  Tasks: {category.tasks?.length || 0}
+        <div className="w-full">
+          {filteredCategories.length > 0 ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
+              {filteredCategories.map((category) => (
+                <Card key={category.id} className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Folder className="mr-2 h-5 w-5 text-primary " />
+                      {editingCategory === category.id ? (
+                        <Input
+                          type="text"
+                          value={category.name}
+                          onChange={(e) => {
+                            const updatedCategories = userCategories.map((c) =>
+                              c.id === category.id
+                                ? { ...c, name: e.target.value }
+                                : c
+                            );
+                            setUserCategories(updatedCategories);
+                          }}
+                          className="ml-2 w-full"
+                        />
+                      ) : (
+                        <span className="truncate text-left w-full pb-1">
+                          {category.name}
+                        </span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-sm text-gray-500">
+                      Tasks: {category.tasks?.length || 0}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    {editingCategory === category.id ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          updateCategory(category.id, category.name)
+                        }
+                      >
+                        <Save className="mr-2 h-4 w-4" /> Save
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingCategory(category.id)}
+                      >
+                        <Edit className="mr-2 h-4 w-4" /> Edit
+                      </Button>
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteCategory(category.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="w-full">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Folder className="h-12 w-12 text-gray-400 mb-4" />
+                <h2 className="text-lg font-semibold mb-2">
+                  No Categories Found
+                </h2>
+                <p className="text-gray-500 text-center">
+                  {searchTerm
+                    ? "No categories match your search. Try a different term."
+                    : "Create a new category to get started."}
                 </p>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                {editingCategory === category.id ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateCategory(category.id, category.name)}
-                  >
-                    <Save className="mr-2 h-4 w-4" /> Save
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingCategory(category.id)}
-                  >
-                    <Edit className="mr-2 h-4 w-4" /> Edit
-                  </Button>
-                )}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deleteCategory(category.id)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </CardFooter>
             </Card>
-          ))}
+          )}
         </div>
-      ) : (
-        <div className="text-center py-12">
-          <Folder className="mx-auto h-12 w-12 text-gray-400" />
-          <h2 className="mt-4 text-lg font-semibold">No Categories Found</h2>
-          <p className="mt-2 text-gray-500">
-            {searchTerm
-              ? "No categories match your search. Try a different term."
-              : "Create a new category to get started."}
-          </p>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
