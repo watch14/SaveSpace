@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/config/firebase";
-import { getDocs, collection, addDoc } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  addDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 import Loading from "./ui/loader";
 
 import {
@@ -23,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CalendarIcon, Edit, Trash2, Plus, Search } from "lucide-react";
 
 export default function Category() {
   const { currentUser } = useAuth();
@@ -72,6 +79,15 @@ export default function Category() {
     }
   };
 
+  const deleteCategory = async (id) => {
+    try {
+      await deleteDoc(doc(db, "category", id));
+      getCategories();
+    } catch (error) {
+      console.error("Error deleting category: ", error);
+    }
+  };
+
   useEffect(() => {
     getCategories();
     console.log(" Category name: ", categoryName);
@@ -85,7 +101,7 @@ export default function Category() {
     <div>
       <h1 className="text-3xl font-bold">Categories</h1>
 
-      <Dialog>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <span>
             <Button>Create Category</Button>
@@ -126,7 +142,13 @@ export default function Category() {
               <p>I'm gonna add more stuff here later</p>
             </CardContent>
             <CardFooter>
-              <p>Card Footer</p>
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => deleteCategory(category.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </CardFooter>
           </Card>
         ))
@@ -137,22 +159,6 @@ export default function Category() {
             <br />
             Create a new category to get started.
           </p>
-          <Dialog>
-            <DialogTrigger asChild>
-              <span>
-                <Button>Create Category</Button>
-              </span>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create a New Category</DialogTitle>
-                <DialogDescription>
-                  Enter a name for your new category:
-                </DialogDescription>
-              </DialogHeader>
-              <Input type="text" placeholder="Category title" />
-            </DialogContent>
-          </Dialog>
         </>
       )}
     </div>

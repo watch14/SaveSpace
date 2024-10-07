@@ -668,7 +668,7 @@ export default function TodoList() {
                   variant="destructive"
                   size="icon"
                   onClick={() => deleteTodo(todo.id, todo.category)}
-                  disabled={todo.done || todo.createdBy !== currentUser.uid} // Disable if not the creator
+                  disabled={todo.createdBy !== currentUser.uid} // Disable if not the creator
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
