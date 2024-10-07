@@ -38,6 +38,7 @@ import { Button } from "./ui/button";
 import Loading from "./ui/loader";
 import { ModeToggle } from "./ui/ThemeToggle";
 import { Create } from "./Create";
+import { Layers3 } from "lucide-react";
 
 export function Aside() {
   const [userName, setUserName] = React.useState(null);
@@ -106,6 +107,19 @@ export function Aside() {
             </TooltipTrigger>
 
             <TooltipContent side="right">Dashboard</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                to="/category"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+              >
+                <Layers3 className="h-5 w-5" />
+                <span className="sr-only">Todo List</span>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Todo List</TooltipContent>
           </Tooltip>
 
           <Tooltip>
