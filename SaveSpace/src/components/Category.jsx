@@ -165,9 +165,9 @@ export default function Category() {
       </div>
 
       {filteredCategories.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-4 grid-flow-row wrap sm:grid-cols-2  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {filteredCategories.map((category) => (
-            <Card key={category.id} className="flex flex-col">
+            <Card key={category.id} className="flex flex-col w-full">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Folder className="mr-2 h-5 w-5 text-primary" />
