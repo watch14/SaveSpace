@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import { Input } from "@/components/ui/input";
 export default function Category() {
   const { currentUser } = useAuth();
   const [categories, setCategories] = useState([]);
+  const [categoryName, setCategoryName] = useState("");
   const [userCategories, setUserCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,8 +56,13 @@ export default function Category() {
     }
   };
 
+  const createCategory = async () => {
+    console.log("category name: ", categoryName);
+  };
+
   useEffect(() => {
     getCategories();
+    console.log(" Category name: ", categoryName);
   }, []);
 
   if (loading) {
@@ -75,13 +82,21 @@ export default function Category() {
 
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogTitle>Create Category</DialogTitle>
             <DialogDescription>
               Create a category to organize your Space.
             </DialogDescription>
           </DialogHeader>
-          <Input type="text" placeholder="Category title" />
-          <Button></Button>
+          <Input
+            type="text"
+            onChange={(e) => setCategoryName(e.target.value)}
+            placeholder="Category title"
+          />
+          <DialogFooter>
+            <Button type="submit" onClick={createCategory}>
+              Create
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
