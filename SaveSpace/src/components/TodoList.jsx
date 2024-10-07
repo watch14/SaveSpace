@@ -53,6 +53,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -536,7 +537,7 @@ export default function TodoList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={null}>All Categories</SelectItem>
-              {categories.map((category) => (
+              {userCategories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
                 </SelectItem>
@@ -598,11 +599,14 @@ export default function TodoList() {
               </CardTitle>
             </CardHeader>
             <CardContent className="h-full flex flex-col justify-between items-start text-left">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-auto">
                 {todo.description}
               </p>
 
-              <Badge variant="outline" className="h-fit w-fit mt-2 ">
+              <Badge
+                variant="outline"
+                className="h-fit w-fit mt-2 flex flex-row gap-2 items-center"
+              >
                 {categories.find((c) => c.id === todo.category)?.name ||
                   "No category"}
               </Badge>
