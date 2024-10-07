@@ -9,6 +9,7 @@ import Dashboard from "./components/Dashboard.jsx";
 import NotFound from "./components/NotFound.jsx";
 import Profile from "./components/Profile.jsx";
 import TodoList from "./components/TodoList.jsx";
+import Category from "./components/Category.jsx";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "/todo",
         element: <ProtectedRoute element={<TodoList />} isRestricted={false} />,
+      },
+      {
+        path: "/category",
+        element: <ProtectedRoute element={<Category />} isRestricted={false} />,
       },
       {
         path: "*",
