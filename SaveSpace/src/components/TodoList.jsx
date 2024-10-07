@@ -189,7 +189,7 @@ export default function TodoList() {
           description: data.description,
           deadline: timestamp,
           category: categoryId,
-          collaborators: updatedCollaborators, // Update collaborators here
+          collaborators: updatedCollaborators,
         });
       } else {
         const newTodoRef = await addDoc(collection(db, "todoList"), {
@@ -199,7 +199,7 @@ export default function TodoList() {
           deadline: timestamp,
           category: categoryId,
           createdBy: userId,
-          collaborators: newCollaboratorsList, // Set collaborators when creating a new todo
+          collaborators: newCollaboratorsList,
         });
 
         const categoryRef = doc(db, "category", categoryId);
@@ -308,7 +308,7 @@ export default function TodoList() {
   return (
     <div className="container mx-auto p-4 w-full ">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Todo List</h1>
+        <h1 className="text-3xl font-bold">Tasks</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button

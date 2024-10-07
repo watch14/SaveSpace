@@ -12,6 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function Category() {
   const { currentUser } = useAuth();
@@ -54,6 +64,29 @@ export default function Category() {
 
   return (
     <div>
+      <h1 className="text-3xl font-bold">Categories</h1>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <span>
+            <Button>Create Category</Button>
+          </span>
+        </DialogTrigger>
+
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              Create a category to organize your Space.
+            </DialogDescription>
+          </DialogHeader>
+          <Input type="text" placeholder="Category title" />
+          <Button></Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Show categories here */}
+      {/* Show categories here */}
       {userCategories.length > 0 ? (
         userCategories.map((category) => (
           <Card key={category.id}>
@@ -63,7 +96,7 @@ export default function Category() {
             </CardHeader>
             <CardContent>
               Number of tasks: {category.tasks?.length || 0}
-              <p>im gonna add more stuf here later</p>
+              <p>I'm gonna add more stuff here later</p>
             </CardContent>
             <CardFooter>
               <p>Card Footer</p>
@@ -73,11 +106,26 @@ export default function Category() {
       ) : (
         <>
           <p>
-            You have no Catetegory.
+            You have no Categories.
             <br />
             Create a new category to get started.
           </p>
-          <Button>Create Category</Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <span>
+                <Button>Create Category</Button>
+              </span>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create a New Category</DialogTitle>
+                <DialogDescription>
+                  Enter a name for your new category:
+                </DialogDescription>
+              </DialogHeader>
+              <Input type="text" placeholder="Category title" />
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>
