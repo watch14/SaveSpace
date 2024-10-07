@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/config/firebase";
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, addDoc } from "firebase/firestore";
 import Loading from "./ui/loader";
 
 import {
@@ -29,6 +29,8 @@ export default function Category() {
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
   const [userCategories, setUserCategories] = useState([]);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const categoryRef = collection(db, "category");
@@ -52,12 +54,22 @@ export default function Category() {
     } catch (error) {
       console.error("Error getting documents: ", error);
     } finally {
-      setLoading(false); // Set loading to false once data is fetched
+      setLoading(false);
     }
   };
 
   const createCategory = async () => {
-    console.log("category name: ", categoryName);
+    try {
+      await addDoc(categoryRef, {
+        name: categoryName,
+        createdBy: currentUser.uid,
+        tasks: [],
+      });
+      getCategories();
+      setDialogOpen(false);
+    } catch (error) {
+      console.error("Error creating category: ", error);
+    }
   };
 
   useEffect(() => {
@@ -66,7 +78,7 @@ export default function Category() {
   }, []);
 
   if (loading) {
-    return <Loading />; // Return loading component when loading is true
+    return <Loading />;
   }
 
   return (
@@ -110,7 +122,7 @@ export default function Category() {
               <CardDescription></CardDescription>
             </CardHeader>
             <CardContent>
-              Number of tasks: {category.tasks?.length || 0}
+              Tasks: {category.tasks?.length || 0}
               <p>I'm gonna add more stuff here later</p>
             </CardContent>
             <CardFooter>
