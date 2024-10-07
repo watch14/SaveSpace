@@ -571,7 +571,7 @@ export default function TodoList() {
         </div>
       )}
 
-      <div className="grid gap-4 grid-flow-row wrap md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      <div className="grid gap-4 grid-flow-row wrap md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5">
         {filteredTodos.map((todo) => (
           <Card
             key={todo.id}
