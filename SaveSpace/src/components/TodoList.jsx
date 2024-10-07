@@ -655,7 +655,7 @@ export default function TodoList() {
                   {todo.done ? "Done!" : "Mark as Done!"}
                 </label>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex ">
                 <Button
                   variant="outline"
                   size="icon"

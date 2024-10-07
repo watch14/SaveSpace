@@ -27,6 +27,19 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -121,7 +134,7 @@ export default function Category() {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Categories</h1>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -157,14 +170,14 @@ export default function Category() {
         </div>
 
         <div className="mb-6">
-          <div className="relative">
+          <div className="relative ">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 "
             />
           </div>
         </div>
@@ -189,10 +202,10 @@ export default function Category() {
                             );
                             setUserCategories(updatedCategories);
                           }}
-                          className="ml-2 w-full"
+                          className="ml-2  "
                         />
                       ) : (
-                        <span className="truncate text-left w-full pb-1">
+                        <span className="truncate text-left w-full h-full pb-1 ">
                           {category.name}
                         </span>
                       )}
@@ -203,7 +216,7 @@ export default function Category() {
                       Tasks: {category.tasks?.length || 0}
                     </p>
                   </CardContent>
-                  <CardFooter className="flex justify-between">
+                  <CardFooter className="flex space-x-2 justify-end">
                     {editingCategory === category.id ? (
                       <Button
                         variant="outline"
@@ -220,16 +233,40 @@ export default function Category() {
                         size="sm"
                         onClick={() => setEditingCategory(category.id)}
                       >
-                        <Edit className="mr-2 h-4 w-4" /> Edit
+                        <Edit className=" h-4 w-4" />
                       </Button>
                     )}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteCategory(category.id)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
-                    </Button>
+                    {/* alert are you sure you want to delete this category */}
+                    <AlertDialog>
+                      <AlertDialogTrigger>
+                        <span>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className=" h-4 w-4" />
+                          </Button>
+                        </span>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete your account and remove your data from our
+                            servers.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            variant="destructive"
+                            onClick={() => deleteCategory(category.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </CardFooter>
                 </Card>
               ))}
