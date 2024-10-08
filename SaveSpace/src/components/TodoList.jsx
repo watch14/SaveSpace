@@ -639,7 +639,6 @@ export default function TodoList() {
               <p className="text-sm text-muted-foreground mb-auto">
                 {todo.description}
               </p>
-
               <Badge
                 variant="outline"
                 className="h-fit w-fit mt-2 flex flex-row gap-2 items-center"
@@ -648,34 +647,38 @@ export default function TodoList() {
                   "No category"}
               </Badge>
 
-              {/* Display Collaborators if created by the user and there are collaborators */}
-              {todo.collaborators?.length > 0 && (
-                <div className="flex flex-wrap w-fit h-fit mt-2">
-                  {todo.createdBy === currentUser.uid && (
-                    <Badge
-                      variant="secondary"
-                      className="text-muted-foreground h-[20px] w-fit mr-2 mt-auto text-center"
-                    >
-                      Owner
-                    </Badge>
-                  )}
+              {/*if the user is the creator of the task always show the owner badge */}
+              <div className="flex flex-wrap w-fit h-fit mt-2">
+                {todo.createdBy === currentUser.uid && (
+                  <Badge
+                    variant="secondary"
+                    className="text-muted-foreground h-[20px] w-fit mr-2 mt-auto text-center"
+                  >
+                    Owner
+                  </Badge>
+                )}
 
-                  {todo.collaborators.map((collaborator, index) => {
-                    const isCurrentUser = collaborator === currentUser.email;
+                {/* Display Collaborators if created by the user and there are collaborators */}
+                {todo.collaborators?.length > 0 && (
+                  <div>
+                    {/* dont show the user email if the user is owner */}
+                    {todo.collaborators.map((collaborator, index) => {
+                      const isCurrentUser = collaborator === currentUser.email;
 
-                    return (
-                      <div key={index} className=" mr-2">
-                        <Badge
-                          variant="secondary"
-                          className="text-muted-foreground h-[20px] w-fit"
-                        >
-                          {isCurrentUser ? "You" : collaborator}
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      return (
+                        <div key={index} className=" mr-2">
+                          <Badge
+                            variant="secondary"
+                            className="text-muted-foreground h-[20px] w-fit"
+                          >
+                            {isCurrentUser ? "You" : collaborator}
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </CardContent>
 
             <CardFooter className="flex justify-between">
