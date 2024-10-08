@@ -65,6 +65,8 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 
+import { useToast } from "@/hooks/use-toast";
+
 const FormSchema = z.object({
   title: z.string().min(1, "Task title is required."),
   description: z.string().optional(),
@@ -88,6 +90,8 @@ export default function TodoList() {
   const [sortOrder, setSortOrder] = useState("none");
   const [newCategory, setNewCategory] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(null);
+
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -226,6 +230,10 @@ export default function TodoList() {
             }
           }
         }
+        toast({
+          title: "Task Updated!",
+          description: "Task has been updated successfully.",
+        });
       } else {
         // If adding a new task
         const newTodoRef = await addDoc(collection(db, "todoList"), {
@@ -247,6 +255,11 @@ export default function TodoList() {
         await updateDoc(categoryRef, {
           tasks: [...currentTasks, newTodoRef.id],
         });
+
+        toast({
+          title: "Task created !",
+          description: "You can view your task in the task page.",
+        });
       }
 
       await getTodos();
@@ -256,6 +269,11 @@ export default function TodoList() {
       setNewCategory("");
     } catch (error) {
       console.error("Error submitting todo: ", error);
+      toast({
+        title: "Error!",
+        description: "An error occurred while saving the task.",
+        variant: "destructive",
+      });
     }
   }
 
@@ -263,8 +281,19 @@ export default function TodoList() {
     try {
       await updateDoc(doc(db, "todoList", id), { done: !done });
       await getTodos();
+      toast({
+        title: done ? "You can do it!" : "Well done! Keep it up!",
+        description: done
+          ? "Always there is a second chance."
+          : "One down, many more to go.",
+      });
     } catch (error) {
       console.error("Error updating todo:", error);
+      toast({
+        title: "Error!",
+        description: "An error occurred while updating the task.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -283,8 +312,17 @@ export default function TodoList() {
 
       await getTodos();
       await getCategories();
+      toast({
+        title: "Task deleted!",
+        description: "Task has been deleted successfully.",
+      });
     } catch (error) {
       console.error("Error deleting todo:", error);
+      toast({
+        title: "Error!",
+        description: "An error occurred while deleting the task.",
+        variant: "destructive",
+      });
     }
   };
 

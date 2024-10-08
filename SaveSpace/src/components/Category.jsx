@@ -111,6 +111,7 @@ export default function Category() {
       toast({
         title: "Error creating category!",
         description: "There was an error creating the category.",
+        variant: "destructive",
       });
     }
   };
@@ -128,6 +129,7 @@ export default function Category() {
       toast({
         title: "Error deleting category!",
         description: "There was an error deleting the category.",
+        variant: "destructive",
       });
     }
   };

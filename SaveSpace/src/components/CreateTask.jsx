@@ -147,6 +147,7 @@ export default function CreateTask({ onTaskCreated }) {
       toast({
         title: "Error Creating The Task!",
         description: "Please try again.",
+        variant: "destructive",
       });
     }
   };
