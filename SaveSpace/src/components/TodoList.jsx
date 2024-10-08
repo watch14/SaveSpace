@@ -747,7 +747,7 @@ export default function TodoList() {
                   </div>
                 )}
 
-                {/* alert are you sure you want to delete this category */}
+                {/* alert */}
                 <AlertDialog>
                   <AlertDialogTrigger>
                     <span>
