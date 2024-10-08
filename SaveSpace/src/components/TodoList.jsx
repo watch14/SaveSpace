@@ -22,6 +22,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -357,6 +369,11 @@ export default function TodoList() {
       });
       await getTodos();
       console.log("collaboratorId", collaboratorEmail);
+
+      toast({
+        title: "Colaboration removed!",
+        description: "You have been removed from the task collaborators.",
+      });
     } catch (error) {
       console.error("Error deleting collaborator:", error);
     }
@@ -729,19 +746,44 @@ export default function TodoList() {
                     })}
                   </div>
                 )}
-                {/* if the user is not creator of the task add a button that allow
-                them to delete them selves from the collaborators list */}
-                {todo.createdBy !== currentUser.uid && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => {
-                      deleteCollaborator(todo.id, currentUser.email);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+
+                {/* alert are you sure you want to delete this category */}
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <span>
+                      {/* if the user is not creator of the task add a button that allow
+                       them to delete them selves from the collaborators list */}
+
+                      {todo.createdBy !== currentUser.uid && (
+                        <Button variant="destructive" size="icon">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </span>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete this category.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={() => {
+                          deleteCollaborator(todo.id, currentUser.email);
+                        }}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
 
