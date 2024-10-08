@@ -116,10 +116,10 @@ export function Aside() {
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <Layers3 className="h-5 w-5" />
-                <span className="sr-only">Todo List</span>
+                <span className="sr-only">Categories</span>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Todo List</TooltipContent>
+            <TooltipContent side="right">Categories</TooltipContent>
           </Tooltip>
 
           <Tooltip>
@@ -129,10 +129,10 @@ export function Aside() {
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <ListChecks className="h-5 w-5" />
-                <span className="sr-only">Todo List</span>
+                <span className="sr-only">Tasks</span>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Todo List</TooltipContent>
+            <TooltipContent side="right">Tasks</TooltipContent>
           </Tooltip>
           <a onClick={getUser}>user</a>
         </nav>
