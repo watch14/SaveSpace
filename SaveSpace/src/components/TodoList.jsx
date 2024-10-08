@@ -810,14 +810,41 @@ export default function TodoList() {
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => deleteTodo(todo.id, todo.category)}
-                  disabled={todo.createdBy !== currentUser.uid} // Disable if not the creator
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+
+                {/* alert are you sure you want to delete this category */}
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <span>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        disabled={todo.createdBy !== currentUser.uid} // Disable if not the creator
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </span>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete this category.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={() => deleteTodo(todo.id, todo.category)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardFooter>
           </Card>
