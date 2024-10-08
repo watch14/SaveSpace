@@ -613,7 +613,7 @@ export default function TodoList() {
           <Card
             key={todo.id}
             className={cn(
-              todo.done && "opacity-60",
+              todo.done && "opacity-25",
               "flex flex-col justify-between w-full"
             )}
           >
