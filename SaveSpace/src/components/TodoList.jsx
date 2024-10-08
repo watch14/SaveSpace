@@ -11,6 +11,7 @@ import {
   addDoc,
   deleteDoc,
   updateDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import {
   Dialog,
@@ -307,6 +308,19 @@ export default function TodoList() {
       await getTodos();
     } catch (error) {
       console.error("Error adding collaborator:", error);
+    }
+  };
+
+  const deleteCollaborator = async (taskId, collaboratorEmail) => {
+    try {
+      const todoRef = doc(db, "todoList", taskId);
+      await updateDoc(todoRef, {
+        collaborators: arrayRemove(collaboratorEmail), // Remove collaborator from the array
+      });
+      await getTodos();
+      console.log("collaboratorId", collaboratorEmail);
+    } catch (error) {
+      console.error("Error deleting collaborator:", error);
     }
   };
 
@@ -657,7 +671,6 @@ export default function TodoList() {
                     Owner
                   </Badge>
                 )}
-
                 {/* Display Collaborators if created by the user and there are collaborators */}
                 {todo.collaborators?.length > 0 && (
                   <div>
@@ -677,6 +690,19 @@ export default function TodoList() {
                       );
                     })}
                   </div>
+                )}
+                {/* if the user is not creator of the task add a button that allow
+                them to delete them selves from the collaborators list */}
+                {todo.createdBy !== currentUser.uid && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => {
+                      deleteCollaborator(todo.id, currentUser.email);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 )}
               </div>
             </CardContent>
