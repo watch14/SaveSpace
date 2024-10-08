@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,8 +14,10 @@ import CreateTask from "./CreateTask";
 import { Plus } from "lucide-react";
 
 export function Create() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <a
           href="#"
@@ -33,7 +36,10 @@ export function Create() {
         </DialogHeader>
 
         {/* dialog content */}
-        <CreateTask />
+        <CreateTask
+          onTaskCreated={() => console.log("Task created")}
+          onClose={() => setDialogOpen(false)}
+        />
         {/* dialog content */}
 
         <DialogFooter></DialogFooter>

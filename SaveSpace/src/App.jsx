@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import { Aside } from "./components/Aside.jsx";
-
 import "./App.css";
 import { ThemeProvider } from "@/components/ui/theme-provider.tsx";
 
