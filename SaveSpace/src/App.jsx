@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Aside } from "./components/Aside.jsx";
 import "./App.css";
 import { ThemeProvider } from "@/components/ui/theme-provider.tsx";
+import { Toaster } from "@/components/ui/toaster.jsx";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Aside />
         <div className="ml-[56px] ">
           <Outlet />
+          <Toaster />
         </div>
       </ThemeProvider>
     </>

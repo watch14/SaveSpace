@@ -1,42 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
+  const { toast } = useToast();
+
+  // Function to show toast notification
+  const showToast = () => {
+    toast({
+      title: "Uh oh! Something went wrong.",
+      description: "There was a problem with your request.",
+    });
+  };
+
   return (
     <div>
       <h1>Dashboard</h1>
 
-      <Button
-        variant="outline"
-        onClick={() => {
-          toast.success("success", {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-          });
-        }}
-      >
-        sucsess
-      </Button>
-
-      <Button
-        variant="outline"
-        onClick={() => {
-          toast.success("success");
-        }}
-      >
-        sucsess
-      </Button>
-
-      <ToastContainer />
+      {/* Call showToast on button click */}
+      <Button onClick={showToast}>Show Toast</Button>
     </div>
   );
 }

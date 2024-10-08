@@ -51,8 +51,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 // Toast
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useToast } from "@/hooks/use-toast";
 
 // Define the form schema using Zod
 const FormSchema = z.object({
@@ -68,6 +67,8 @@ export default function CreateTask({ onTaskCreated }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [categories, setCategories] = useState([]);
+
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -131,7 +132,10 @@ export default function CreateTask({ onTaskCreated }) {
       // Show success toast notification
       setDialogOpen(false);
 
-      toast.success("Task created successfully!");
+      toast({
+        title: "Task created !",
+        description: "You can view your task in the task page.",
+      });
 
       form.reset();
       setNewCategory("");
@@ -140,13 +144,15 @@ export default function CreateTask({ onTaskCreated }) {
       }
     } catch (error) {
       console.error("Error creating task: ", error);
-      toast.error("Error creating task. Please try again."); // Show error toast
+      toast({
+        title: "Error Creating The Task!",
+        description: "Please try again.",
+      });
     }
   };
 
   return (
     <>
-      <ToastContainer /> {/* Add ToastContainer here */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button>Create Task</Button>

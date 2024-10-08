@@ -52,6 +52,9 @@ import {
   Save,
 } from "lucide-react";
 
+// Toast
+import { useToast } from "@/hooks/use-toast";
+
 export default function Category() {
   const { currentUser } = useAuth();
   const [categories, setCategories] = useState([]);
@@ -61,8 +64,9 @@ export default function Category() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingCategory, setEditingCategory] = useState(null);
-
   const categoryRef = collection(db, "category");
+
+  const { toast } = useToast();
 
   const getCategories = async () => {
     try {
@@ -95,9 +99,19 @@ export default function Category() {
       });
       getCategories();
       setDialogOpen(false);
+
+      toast({
+        title: "Category created!",
+        description: "You can view your task in the categpry page.",
+      });
+
       setCategoryName("");
     } catch (error) {
       console.error("Error creating category: ", error);
+      toast({
+        title: "Error creating category!",
+        description: "There was an error creating the category.",
+      });
     }
   };
 
@@ -105,8 +119,16 @@ export default function Category() {
     try {
       await deleteDoc(doc(db, "category", id));
       getCategories();
+      toast({
+        title: "Category Deleted!",
+        description: "Category has been deleted successfully.",
+      });
     } catch (error) {
       console.error("Error deleting category: ", error);
+      toast({
+        title: "Error deleting category!",
+        description: "There was an error deleting the category.",
+      });
     }
   };
 
@@ -115,8 +137,16 @@ export default function Category() {
       await updateDoc(doc(db, "category", id), { name });
       getCategories();
       setEditingCategory(null);
+      toast({
+        title: "Category Updated!",
+        description: "Category has been updated successfully.",
+      });
     } catch (error) {
       console.error("Error updating category: ", error);
+      toast({
+        title: "Error updating category!",
+        description: "There was an error updating the category.",
+      });
     }
   };
 
@@ -139,9 +169,11 @@ export default function Category() {
           <h1 className="text-3xl font-bold">Categories</h1>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Create Category
-              </Button>
+              <span>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> Create Category
+                </Button>
+              </span>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>

@@ -37,7 +37,7 @@ export function Create() {
 
         {/* dialog content */}
         <CreateTask
-          onTaskCreated={() => console.log("Task created")}
+          onTaskCreated={() => setDialogOpen(false)}
           onClose={() => setDialogOpen(false)}
         />
         {/* dialog content */}
