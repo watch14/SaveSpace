@@ -43,7 +43,7 @@ import { CalendarIcon, Edit, Trash2, Plus, Search } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
-import { format, isAfter, isBefore, isEqual } from "date-fns";
+import { format, isAfter, isBefore, isEqual, isPast } from "date-fns";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -683,6 +683,10 @@ export default function TodoList() {
             key={todo.id}
             className={cn(
               todo.done && "opacity-25",
+              !todo.done &&
+                todo.deadline &&
+                isPast(todo.deadline) &&
+                "border-red-300 ",
               "flex flex-col justify-between w-full"
             )}
           >
@@ -716,7 +720,6 @@ export default function TodoList() {
                   "No category"}
               </Badge>
 
-              {/*if the user is the creator of the task always show the owner badge */}
               <div className="flex flex-wrap w-fit h-fit mt-2">
                 {todo.createdBy === currentUser.uid && (
                   <Badge
@@ -726,15 +729,12 @@ export default function TodoList() {
                     Owner
                   </Badge>
                 )}
-                {/* Display Collaborators if created by the user and there are collaborators */}
                 {todo.collaborators?.length > 0 && (
                   <div>
-                    {/* dont show the user email if the user is owner */}
                     {todo.collaborators.map((collaborator, index) => {
                       const isCurrentUser = collaborator === currentUser.email;
-
                       return (
-                        <div key={index} className=" mr-2">
+                        <div key={index} className="mr-2">
                           <Badge
                             variant="secondary"
                             className="text-muted-foreground h-[20px] w-fit"
@@ -747,13 +747,9 @@ export default function TodoList() {
                   </div>
                 )}
 
-                {/* alert */}
                 <AlertDialog>
                   <AlertDialogTrigger>
                     <span>
-                      {/* if the user is not creator of the task add a button that allow
-                       them to delete them selves from the collaborators list */}
-
                       {todo.createdBy !== currentUser.uid && (
                         <Button variant="destructive" size="icon">
                           <Trash2 className="h-4 w-4" />
@@ -806,19 +802,18 @@ export default function TodoList() {
                   variant="outline"
                   size="icon"
                   onClick={() => editTodo(todo)}
-                  disabled={todo.done || todo.createdBy !== currentUser.uid} // Disable if not the creator
+                  disabled={todo.done || todo.createdBy !== currentUser.uid}
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
 
-                {/* alert are you sure you want to delete */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <span>
                       <Button
                         variant="destructive"
                         size="icon"
-                        disabled={todo.createdBy !== currentUser.uid} // Disable if not the creator
+                        disabled={todo.createdBy !== currentUser.uid}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
