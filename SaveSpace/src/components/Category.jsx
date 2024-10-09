@@ -11,13 +11,14 @@ import {
 } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Layers3,
   Plus,
   Search,
   Folder,
   Save,
   Edit,
   Trash2,
+  Layers3,
+  ListChecks,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,7 +187,7 @@ export default function Category() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="grid" className="w-full">
+      <Tabs defaultValue="list" className="w-full">
         <div className="flex justify-between items-center mb-6">
           <TabsList>
             <TabsTrigger value="grid">Grid View</TabsTrigger>
@@ -282,10 +283,14 @@ function CategoryCard({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground">
-          Tasks: {category.tasks?.length || 0}
-        </p>
+      <CardContent className="flex-grow ">
+        {/* tasks */}
+        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+          <ListChecks className="w-4 h-4 mr-1" />
+          Tasks:
+          <strong className="ml-1"> {category.tasks?.length || 0}</strong>
+        </div>
+        {/* tasks */}
       </CardContent>
       <CardFooter className="flex space-x-2 justify-end">
         {editingCategory === category.id ? (
@@ -359,9 +364,14 @@ function CategoryListItem({
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <p className="text-sm text-muted-foreground mr-4">
-            Tasks: {category.tasks?.length || 0}
-          </p>
+          {/* tasks */}
+          <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+            <ListChecks className="w-4 h-4 mr-1" />
+            Tasks:
+            <strong className="ml-1"> {category.tasks?.length || 0}</strong>
+          </div>
+          {/* tasks */}
+
           {editingCategory === category.id ? (
             <Button
               variant="outline"
