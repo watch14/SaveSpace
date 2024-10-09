@@ -349,7 +349,7 @@ function CategoryListItem({
 }) {
   return (
     <Card>
-      <CardContent className="flex items-center justify-between py-4">
+      <CardContent className="grid grid-cols-3 items-center justify-between py-4">
         <div className="flex items-center">
           <Folder className="mr-2 h-5 w-5 text-primary" />
           {editingCategory === category.id ? (
@@ -363,15 +363,14 @@ function CategoryListItem({
             <span className="font-medium">{category.name}</span>
           )}
         </div>
-        <div className="flex items-center space-x-2">
-          {/* tasks */}
-          <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
-            <ListChecks className="w-4 h-4 mr-1" />
-            Tasks:
-            <strong className="ml-1"> {category.tasks?.length || 0}</strong>
-          </div>
-          {/* tasks */}
-
+        {/* tasks */}
+        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground w-fit">
+          <ListChecks className="w-4 h-4 mr-1" />
+          Tasks:
+          <strong className="ml-1"> {category.tasks?.length || 0}</strong>
+        </div>
+        {/* tasks */}
+        <div className="flex items-center space-x-2 ml-auto">
           {editingCategory === category.id ? (
             <Button
               variant="outline"
