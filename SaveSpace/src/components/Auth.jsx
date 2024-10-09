@@ -125,162 +125,166 @@ export const Auth = () => {
   };
 
   return (
-    <Tabs defaultValue="Sign In" className="w-[340px]">
-      <TabsList className="grid w-full grid-cols-2 h-fit ">
-        <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
-        <TabsTrigger value="Sign In">Sign In</TabsTrigger>
-      </TabsList>
-      <TabsContent value="Sign Up">
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
-            <CardDescription>Create an accont.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3 w-full ">
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Name"
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    validateName(e.target.value);
-                  }}
-                  value={name}
-                />
-                {nameError && (
-                  <p className="text-red-500 text-sm mt-1 text-left">
-                    {nameError}
-                  </p>
+    <div className="container min-w-full min-h-full px-4 my-auto">
+      <Tabs defaultValue="Sign In" className="mt-auto ">
+        <TabsList className="grid w-full grid-cols-2 h-fit ">
+          <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
+          <TabsTrigger value="Sign In">Sign In</TabsTrigger>
+        </TabsList>
+        <TabsContent value="Sign Up">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sign Up</CardTitle>
+              <CardDescription>Create an accont.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3 w-full ">
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Name"
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      validateName(e.target.value);
+                    }}
+                    value={name}
+                  />
+                  {nameError && (
+                    <p className="text-red-500 text-sm mt-1 text-left">
+                      {nameError}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      validateEmail(e.target.value);
+                    }}
+                    value={email}
+                  />
+                  {emailError && (
+                    <p className="text-red-500 text-sm mt-1 text-left">
+                      {emailError}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      validatePassword(e.target.value);
+                    }}
+                    value={password}
+                  />
+                  {passwordError && (
+                    <p className="text-red-500 text-sm mt-1 text-left">
+                      {passwordError}
+                    </p>
+                  )}
+                </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-5 w-5" />
+                    <AlertTitle className="text-left text-red-600">
+                      {error}
+                    </AlertTitle>
+                  </Alert>
                 )}
               </div>
+            </CardContent>
+            <CardFooter className="grid w-full grid-cols-2 gap-3">
+              <Button className="w-full" onClick={handleSignUp}>
+                Sign Up
+              </Button>
 
-              <div>
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    validateEmail(e.target.value);
-                  }}
-                  value={email}
-                />
-                {emailError && (
-                  <p className="text-red-500 text-sm mt-1 text-left">
-                    {emailError}
-                  </p>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleGoogleSignIn}
+              >
+                <FcGoogle />
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        <TabsContent value="Sign In">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sign In</CardTitle>
+              <CardDescription>
+                Sign in with an existing account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3 w-full ">
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      validateEmail(e.target.value);
+                    }}
+                    value={email}
+                  />
+                  {emailError && (
+                    <p className="text-red-500 text-sm mt-1 text-left">
+                      {emailError}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      validatePassword(e.target.value);
+                    }}
+                    value={password}
+                  />
+                  {passwordError && (
+                    <p className="text-red-500 text-sm mt-1 text-left">
+                      {passwordError}
+                    </p>
+                  )}
+                </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-5 w-5" />
+                    <AlertTitle className="text-left text-red-600">
+                      {error}
+                    </AlertTitle>
+                  </Alert>
                 )}
               </div>
+            </CardContent>
+            <CardFooter className="grid w-full grid-cols-2 gap-3">
+              <Button className="w-full" onClick={handleSignIn}>
+                Sign In
+              </Button>
 
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    validatePassword(e.target.value);
-                  }}
-                  value={password}
-                />
-                {passwordError && (
-                  <p className="text-red-500 text-sm mt-1 text-left">
-                    {passwordError}
-                  </p>
-                )}
-              </div>
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-5 w-5" />
-                  <AlertTitle className="text-left text-red-600">
-                    {error}
-                  </AlertTitle>
-                </Alert>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="grid w-full grid-cols-2 gap-3">
-            <Button className="w-full" onClick={handleSignUp}>
-              Sign Up
-            </Button>
-
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={handleGoogleSignIn}
-            >
-              <FcGoogle />
-            </Button>
-          </CardFooter>
-        </Card>
-      </TabsContent>
-      <TabsContent value="Sign In">
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>Sign in with an existing account.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3 w-full ">
-              <div>
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    validateEmail(e.target.value);
-                  }}
-                  value={email}
-                />
-                {emailError && (
-                  <p className="text-red-500 text-sm mt-1 text-left">
-                    {emailError}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    validatePassword(e.target.value);
-                  }}
-                  value={password}
-                />
-                {passwordError && (
-                  <p className="text-red-500 text-sm mt-1 text-left">
-                    {passwordError}
-                  </p>
-                )}
-              </div>
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-5 w-5" />
-                  <AlertTitle className="text-left text-red-600">
-                    {error}
-                  </AlertTitle>
-                </Alert>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="grid w-full grid-cols-2 gap-3">
-            <Button className="w-full" onClick={handleSignIn}>
-              Sign In
-            </Button>
-
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={handleGoogleSignIn}
-            >
-              <FcGoogle />
-            </Button>
-          </CardFooter>
-        </Card>
-      </TabsContent>
-    </Tabs>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleGoogleSignIn}
+              >
+                <FcGoogle />
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };

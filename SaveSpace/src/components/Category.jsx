@@ -291,7 +291,7 @@ function CategoryCard({
       </CardHeader>
       <CardContent className="flex-grow ">
         {/* tasks */}
-        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
           <ListChecks className="w-4 h-4 mr-1" />
           Tasks:
           <strong className="ml-1"> {category.tasks?.length || 0}</strong>
@@ -370,7 +370,7 @@ function CategoryListItem({
           )}
         </div>
         {/* tasks */}
-        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground w-fit">
+        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground w-fit">
           <ListChecks className="w-4 h-4 mr-1" />
           Tasks:
           <strong className="ml-1"> {category.tasks?.length || 0}</strong>

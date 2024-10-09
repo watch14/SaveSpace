@@ -106,7 +106,7 @@ export default function TodoList() {
   const [filter, setFilter] = useState("notDone");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState(null);
-  const [sortOrder, setSortOrder] = useState("none");
+  const [sortOrder, setSortOrder] = useState("soonest");
   const [newCategory, setNewCategory] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(null);
 
