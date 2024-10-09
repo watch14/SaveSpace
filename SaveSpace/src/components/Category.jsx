@@ -19,6 +19,8 @@ import {
   Trash2,
   Layers3,
   ListChecks,
+  LayoutGrid,
+  StretchHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -188,12 +190,8 @@ export default function Category() {
       </div>
 
       <Tabs defaultValue="list" className="w-full">
-        <div className="flex justify-between items-center mb-6">
-          <TabsList>
-            <TabsTrigger value="grid">Grid View</TabsTrigger>
-            <TabsTrigger value="list">List View</TabsTrigger>
-          </TabsList>
-          <div className="relative w-64">
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <div className="relative w-full">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
@@ -203,6 +201,14 @@ export default function Category() {
               className="pl-8"
             />
           </div>
+          <TabsList>
+            <TabsTrigger value="grid">
+              <LayoutGrid />
+            </TabsTrigger>
+            <TabsTrigger value="list">
+              <StretchHorizontal />
+            </TabsTrigger>
+          </TabsList>
         </div>
 
         <TabsContent value="grid" className="mt-0">
