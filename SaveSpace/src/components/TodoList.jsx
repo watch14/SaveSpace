@@ -811,9 +811,9 @@ export default function TodoList() {
                   <Edit className="h-4 w-4" />
                 </Button>
 
-                {/* alert are you sure you want to delete this category */}
+                {/* alert are you sure you want to delete */}
                 <AlertDialog>
-                  <AlertDialogTrigger>
+                  <AlertDialogTrigger asChild>
                     <span>
                       <Button
                         variant="destructive"

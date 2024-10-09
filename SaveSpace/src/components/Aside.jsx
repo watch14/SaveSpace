@@ -78,14 +78,16 @@ export function Aside() {
           <ModeToggle />
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-md"
-              >
-                <User className="h-5 w-5" />
-                <span className="sr-only">User menu</span>
-              </Button>
+              <span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded-md"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">User menu</span>
+                </Button>
+              </span>
             </PopoverTrigger>
             <PopoverContent className="w-fill p-4" side="right">
               {isLoggedIn ? (
@@ -118,14 +120,16 @@ export function Aside() {
           </Popover>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-fill rounded-md"
-              >
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Button>
+              <span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-fill rounded-md"
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
+                </Button>
+              </span>
             </PopoverTrigger>
             <PopoverContent className="w-fit p-4 pr-8 pl-8 " side="right">
               <div className="flex flex-col space-y-4 justify-center items-center">
