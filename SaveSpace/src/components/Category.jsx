@@ -190,7 +190,7 @@ export default function Category() {
       </div>
 
       <Tabs defaultValue="list" className="w-full">
-        <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="flex justify-between items-center mb-6 gap-4 ">
           <div className="relative w-full">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -198,15 +198,15 @@ export default function Category() {
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
+              className="pl-8 h-full"
             />
           </div>
           <TabsList>
-            <TabsTrigger value="grid">
+            <TabsTrigger className="h-fit w-fit" value="grid">
               <LayoutGrid />
             </TabsTrigger>
             <TabsTrigger value="list">
-              <StretchHorizontal />
+              <StretchHorizontal className="h-5 w-5 " />
             </TabsTrigger>
           </TabsList>
         </div>
