@@ -1,210 +1,138 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-import {
-  Home,
-  Search,
-  Settings,
-  Upload,
-  ListChecks,
-  User,
-  Plus,
-  Sun,
-  Moon,
-} from "lucide-react";
-
+import { Home, Layers3, ListChecks, User, Settings } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   TooltipProvider,
-} from "../components/ui/tooltip";
-
-import { auth } from "../config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import getUser, { isUserLoggedIn } from "@/utils/getuser";
-import { useAuth } from "@/context/AuthContext"; // Import the useAuth hook
-
+} from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/ui/ThemeToggle";
+import { Create } from "@/components/Create";
+import { auth } from "@/config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { isUserLoggedIn } from "@/utils/getuser";
 import { SignOut } from "@/utils/SignOut";
-import { Button } from "./ui/button";
-import Loading from "./ui/loader";
-import { ModeToggle } from "./ui/ThemeToggle";
-import { Create } from "./Create";
-import { Layers3 } from "lucide-react";
+
+const NavItem = ({ href, icon: Icon, label }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Link
+        to={href}
+        className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <Icon className="h-5 w-5" />
+        <span className="sr-only">{label}</span>
+      </Link>
+    </TooltipTrigger>
+    <TooltipContent side="right">{label}</TooltipContent>
+  </Tooltip>
+);
 
 export function Aside() {
-  const [userName, setUserName] = React.useState(null);
-  const [userPic, setUserPic] = React.useState(null);
-
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserName = () => {
-      // Add auth state change listener
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User is signed in
-          const name = user.displayName;
-          const pic = user.photoURL;
-          setUserName(name);
-          setUserPic(pic);
-        } else {
-          console.log("You need to login");
-          setUserName(null);
-          setUserPic(null);
-        }
-        setLoading(false);
-      });
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
 
-      return () => unsubscribe();
-    };
-
-    fetchUserName();
-  }, []);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
     const checkUserStatus = async () => {
       const loggedIn = await isUserLoggedIn();
-      if (!loggedIn) {
-      } else {
-      }
       setIsLoggedIn(loggedIn);
     };
 
     checkUserStatus();
+    return () => unsubscribe();
   }, []);
 
   if (loading) {
-    return <Loading />;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   return (
     <TooltipProvider>
-      <aside className="fixed inset-y-0 left-0 z-10  w-14 flex-col border-r bg-background sm:flex pt-1 pb-1 flex justify-end">
-        <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-          {/* Create whatever your heart desire. */}
+      <aside className="fixed inset-y-0 left-0 z-10 flex w-16 flex-col justify-between border-r bg-background p-2">
+        <nav className="flex flex-col items-center space-y-4">
           <Create />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                href="/"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <Home className="h-5 w-5" />
-                <span className="sr-only">Dashboard</span>
-              </a>
-            </TooltipTrigger>
-
-            <TooltipContent side="right">Dashboard</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                to="/category"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <Layers3 className="h-5 w-5" />
-                <span className="sr-only">Categories</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Categories</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                to="/todo"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              >
-                <ListChecks className="h-5 w-5" />
-                <span className="sr-only">Tasks</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Tasks</TooltipContent>
-          </Tooltip>
-          <a onClick={getUser}>user</a>
+          <NavItem href="/" icon={Home} label="Dashboard" />
+          <NavItem href="/category" icon={Layers3} label="Categories" />
+          <NavItem href="/todo" icon={ListChecks} label="Tasks" />
         </nav>
 
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <ModeToggle />
-            </TooltipTrigger>
-            <TooltipContent side="right">Theme</TooltipContent>
-          </Tooltip>
-
+        <nav className="flex flex-col items-center space-y-4">
+          <ModeToggle />
           <Popover>
-            <PopoverTrigger className="p-0 bg-inherit border-0 hover:border-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <a
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  >
-                    <User className="h-5 w-5" />
-                    <span className="sr-only">User</span>
-                  </a>
-                </TooltipTrigger>
-
-                <TooltipContent side="right">Settings</TooltipContent>
-              </Tooltip>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-md"
+              >
+                <User className="h-5 w-5" />
+                <span className="sr-only">User menu</span>
+              </Button>
             </PopoverTrigger>
-            <PopoverContent className="ml-8 absolute -top-16">
-              <Link to={"/profile"}>
-                {isLoggedIn && (
-                  <div className="flex flex-row items-center justify-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={userPic} />
+            <PopoverContent className="w-fill p-4" side="right">
+              {isLoggedIn ? (
+                <div className="flex flex-row items-center justify-center gap-3 ">
+                  <div className="flex flex-col gap-2 px-4 items-center  justify-center">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={user?.photoURL} />
                       <AvatarFallback>
-                        <User />
+                        {/* <User /> */}
+                        {user?.displayName?.[0] || <User />}
                       </AvatarFallback>
                     </Avatar>
-                    <p className=" text-secondary-foreground">{userName}</p>
+                    <p className="text-sm font-medium">{user?.displayName}</p>
+                  </div>
+                  <div className="flex flex-col gap-2 px-4">
+                    <Link to="/profile" className="w-full">
+                      <Button variant="outline" className="w-full">
+                        Profile
+                      </Button>
+                    </Link>
                     <SignOut />
                   </div>
-                )}
-              </Link>
-
-              {!isLoggedIn && (
-                <div className="flex flex-row items-center justify-center gap-3">
-                  <a href="/auth">
-                    <Button>Sign In</Button>
-                  </a>
                 </div>
+              ) : (
+                <Link to="/auth" className="w-full">
+                  <Button className="w-full">Sign In</Button>
+                </Link>
               )}
             </PopoverContent>
           </Popover>
-
           <Popover>
-            <PopoverTrigger className="p-0 bg-inherit border-0 hover:border-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <a
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  >
-                    <Settings className="h-5 w-5" />
-                    <span className="sr-only">Settings</span>
-                  </a>
-                </TooltipTrigger>
-
-                <TooltipContent side="right">Settings</TooltipContent>
-              </Tooltip>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-fill rounded-md"
+              >
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
             </PopoverTrigger>
-            <PopoverContent className="ml-8  absolute -top-16">
-              <ModeToggle />
+            <PopoverContent className="w-fit p-4 pr-8 pl-8 " side="right">
+              <div className="flex flex-col space-y-4 justify-center items-center">
+                <h3 className="text-sm font-medium">Settings</h3>
+                <ModeToggle />
+                {/* Add more settings options here */}
+              </div>
             </PopoverContent>
           </Popover>
         </nav>
