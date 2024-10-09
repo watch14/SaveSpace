@@ -50,6 +50,7 @@ import {
   Search,
   Folder,
   Save,
+  Layers3,
 } from "lucide-react";
 
 // Toast
@@ -168,7 +169,10 @@ export default function Category() {
     <div className="w-full min-h-screen bg-background">
       <div className=" mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Categories</h1>
+          <div className="flex flex-row justify-center items-center gap-3">
+            <Layers3 className="w-full h-full" />
+            <h1 className="text-3xl font-bold">Categories</h1>
+          </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <span>

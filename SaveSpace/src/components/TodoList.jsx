@@ -39,7 +39,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, Edit, Trash2, Plus, Search } from "lucide-react";
+import {
+  CalendarIcon,
+  Edit,
+  Trash2,
+  Plus,
+  Search,
+  ListChecks,
+} from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
@@ -414,7 +421,10 @@ export default function TodoList() {
   return (
     <div className="container mx-auto p-4 w-full ">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Tasks</h1>
+        <div className="flex flex-row justify-center items-center gap-3">
+          <ListChecks className="w-full h-full" />
+          <h1 className="text-3xl font-bold ">Tasks</h1>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -617,8 +627,8 @@ export default function TodoList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="notDone">On Going</SelectItem>
-              <SelectItem value="done">Done</SelectItem>
               <SelectItem value="all">All Tasks</SelectItem>
+              <SelectItem value="done">Done</SelectItem>
             </SelectContent>
           </Select>
 
@@ -686,7 +696,7 @@ export default function TodoList() {
               !todo.done &&
                 todo.deadline &&
                 isPast(todo.deadline) &&
-                "border-red-300 ",
+                "border-destructive border-2 shadow-[0_0_10px_rgba(220,38,38,0.5)]",
               "flex flex-col justify-between w-full"
             )}
           >
