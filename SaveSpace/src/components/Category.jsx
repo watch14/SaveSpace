@@ -9,8 +9,18 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import Loading from "./ui/loader";
-
+import { useToast } from "@/hooks/use-toast";
+import {
+  Layers3,
+  Plus,
+  Search,
+  Folder,
+  Save,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -22,12 +32,11 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,52 +48,38 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  CalendarIcon,
-  Edit,
-  Trash2,
-  Plus,
-  Search,
-  Folder,
-  Save,
-  Layers3,
-} from "lucide-react";
-
-// Toast
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Category() {
   const { currentUser } = useAuth();
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
-  const [userCategories, setUserCategories] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingCategory, setEditingCategory] = useState(null);
   const categoryRef = collection(db, "category");
-
   const { toast } = useToast();
+
+  useEffect(() => {
+    getCategories();
+  }, []);
 
   const getCategories = async () => {
     try {
       const data = await getDocs(categoryRef);
-      const categoryList = data.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const categoryList = data.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((category) => category.createdBy === currentUser?.uid);
       setCategories(categoryList);
-
-      const userFilteredCategories = categoryList.filter(
-        (category) => category.createdBy === currentUser?.uid
-      );
-
-      setUserCategories(userFilteredCategories);
     } catch (error) {
       console.error("Error getting documents: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch categories",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -100,18 +95,13 @@ export default function Category() {
       });
       getCategories();
       setDialogOpen(false);
-
-      toast({
-        title: "Category created!",
-        description: "You can view your task in the categpry page.",
-      });
-
       setCategoryName("");
+      toast({ title: "Success", description: "Category created successfully" });
     } catch (error) {
       console.error("Error creating category: ", error);
       toast({
-        title: "Error creating category!",
-        description: "There was an error creating the category.",
+        title: "Error",
+        description: "Failed to create category",
         variant: "destructive",
       });
     }
@@ -121,15 +111,12 @@ export default function Category() {
     try {
       await deleteDoc(doc(db, "category", id));
       getCategories();
-      toast({
-        title: "Category Deleted!",
-        description: "Category has been deleted successfully.",
-      });
+      toast({ title: "Success", description: "Category deleted successfully" });
     } catch (error) {
       console.error("Error deleting category: ", error);
       toast({
-        title: "Error deleting category!",
-        description: "There was an error deleting the category.",
+        title: "Error",
+        description: "Failed to delete category",
         variant: "destructive",
       });
     }
@@ -140,191 +127,285 @@ export default function Category() {
       await updateDoc(doc(db, "category", id), { name });
       getCategories();
       setEditingCategory(null);
-      toast({
-        title: "Category Updated!",
-        description: "Category has been updated successfully.",
-      });
+      toast({ title: "Success", description: "Category updated successfully" });
     } catch (error) {
       console.error("Error updating category: ", error);
       toast({
-        title: "Error updating category!",
-        description: "There was an error updating the category.",
+        title: "Error",
+        description: "Failed to update category",
+        variant: "destructive",
       });
     }
   };
 
-  useEffect(() => {
-    getCategories();
-  }, []);
-
-  const filteredCategories = userCategories.filter((category) =>
+  const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
-    return <Loading />;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="w-full min-h-screen bg-background">
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex flex-row justify-center items-center gap-3">
-            <Layers3 className="w-full h-full" />
-            <h1 className="text-3xl font-bold">Categories</h1>
-          </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <span>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" /> Create Category
-                </Button>
-              </span>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Category</DialogTitle>
-                <DialogDescription>
-                  <p>
-                    Create a category to organize your Space.
-                    <br />
-                    (Try to keep the category title simple and short).
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-              <Input
-                type="text"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Category title"
-              />
-              <DialogFooter>
-                <Button type="submit" onClick={createCategory}>
-                  Create Category
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-3">
+          <Layers3 className="h-8 w-8" />
+          <h1 className="text-3xl font-bold">Categories</h1>
         </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> Create Category
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Category</DialogTitle>
+              <DialogDescription>
+                Create a category to organize your Space. (Try to keep the
+                category title simple and short).
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              type="text"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              placeholder="Category title"
+            />
+            <DialogFooter>
+              <Button type="submit" onClick={createCategory}>
+                Create Category
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-        <div className="mb-6">
-          <div className="relative ">
+      <Tabs defaultValue="grid" className="w-full">
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="grid">Grid View</TabsTrigger>
+            <TabsTrigger value="list">List View</TabsTrigger>
+          </TabsList>
+          <div className="relative w-64">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 "
+              className="pl-8"
             />
           </div>
         </div>
 
-        <div className="w-full">
-          {filteredCategories.length > 0 ? (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6">
+        <TabsContent value="grid" className="mt-0">
+          <ScrollArea className="h-[calc(100vh-12rem)]">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredCategories.map((category) => (
-                <Card key={category.id} className="flex flex-col">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Folder className="mr-2 h-5 w-5 text-primary " />
-                      {editingCategory === category.id ? (
-                        <Input
-                          type="text"
-                          value={category.name}
-                          onChange={(e) => {
-                            const updatedCategories = userCategories.map((c) =>
-                              c.id === category.id
-                                ? { ...c, name: e.target.value }
-                                : c
-                            );
-                            setUserCategories(updatedCategories);
-                          }}
-                          className="ml-2  "
-                        />
-                      ) : (
-                        <span className="truncate text-left w-[222.45px] h-full pb-1 ">
-                          {category.name}
-                        </span>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-sm text-gray-500">
-                      Tasks: {category.tasks?.length || 0}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex space-x-2 justify-end">
-                    {editingCategory === category.id ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          updateCategory(category.id, category.name)
-                        }
-                      >
-                        <Save className="mr-2 h-4 w-4" /> Save
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingCategory(category.id)}
-                      >
-                        <Edit className=" h-4 w-4" />
-                      </Button>
-                    )}
-                    {/* alert are you sure you want to delete this category */}
-                    <AlertDialog>
-                      <AlertDialogTrigger>
-                        <span>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className=" h-4 w-4" />
-                          </Button>
-                        </span>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you absolutely sure?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete this category.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            variant="destructive"
-                            onClick={() => deleteCategory(category.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </CardFooter>
-                </Card>
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  editingCategory={editingCategory}
+                  setEditingCategory={setEditingCategory}
+                  updateCategory={updateCategory}
+                  deleteCategory={deleteCategory}
+                />
               ))}
             </div>
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="list" className="mt-0">
+          <ScrollArea className="h-[calc(100vh-12rem)]">
+            <div className="space-y-4">
+              {filteredCategories.map((category) => (
+                <CategoryListItem
+                  key={category.id}
+                  category={category}
+                  editingCategory={editingCategory}
+                  setEditingCategory={setEditingCategory}
+                  updateCategory={updateCategory}
+                  deleteCategory={deleteCategory}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
+
+      {filteredCategories.length === 0 && (
+        <Card className="mt-8">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Folder className="h-12 w-12 text-muted-foreground mb-4" />
+            <h2 className="text-lg font-semibold mb-2">No Categories Found</h2>
+            <p className="text-muted-foreground text-center">
+              {searchTerm
+                ? "No categories match your search. Try a different term."
+                : "Create a new category to get started."}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function CategoryCard({
+  category,
+  editingCategory,
+  setEditingCategory,
+  updateCategory,
+  deleteCategory,
+}) {
+  return (
+    <Card className="flex flex-col">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Folder className="mr-2 h-5 w-5 text-primary" />
+          {editingCategory === category.id ? (
+            <Input
+              type="text"
+              value={category.name}
+              onChange={(e) => updateCategory(category.id, e.target.value)}
+              className="ml-2"
+            />
           ) : (
-            <Card className="w-full">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Folder className="h-12 w-12 text-gray-400 mb-4" />
-                <h2 className="text-lg font-semibold mb-2">
-                  No Categories Found
-                </h2>
-                <p className="text-gray-500 text-center">
-                  {searchTerm
-                    ? "No categories match your search. Try a different term."
-                    : "Create a new category to get started."}
-                </p>
-              </CardContent>
-            </Card>
+            <span className="truncate text-left w-full pb-1">
+              {category.name}
+            </span>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <p className="text-sm text-muted-foreground">
+          Tasks: {category.tasks?.length || 0}
+        </p>
+      </CardContent>
+      <CardFooter className="flex space-x-2 justify-end">
+        {editingCategory === category.id ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => updateCategory(category.id, category.name)}
+          >
+            <Save className="mr-2 h-4 w-4" /> Save
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditingCategory(category.id)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this
+                category.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={() => deleteCategory(category.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function CategoryListItem({
+  category,
+  editingCategory,
+  setEditingCategory,
+  updateCategory,
+  deleteCategory,
+}) {
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-between py-4">
+        <div className="flex items-center">
+          <Folder className="mr-2 h-5 w-5 text-primary" />
+          {editingCategory === category.id ? (
+            <Input
+              type="text"
+              value={category.name}
+              onChange={(e) => updateCategory(category.id, e.target.value)}
+              className="ml-2"
+            />
+          ) : (
+            <span className="font-medium">{category.name}</span>
           )}
         </div>
-      </div>
-    </div>
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-muted-foreground mr-4">
+            Tasks: {category.tasks?.length || 0}
+          </p>
+          {editingCategory === category.id ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updateCategory(category.id, category.name)}
+            >
+              <Save className="mr-2 h-4 w-4" /> Save
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingCategory(category.id)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  this category.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => deleteCategory(category.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
