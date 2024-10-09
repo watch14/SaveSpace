@@ -1,5 +1,6 @@
 #root {
-  margin: 0 auto;
+  width: 100%;
+  margin: 0 0;
   padding: 2rem 16px;
   text-align: center;
 }

@@ -151,8 +151,8 @@ export default function Category() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container min-w-full px-4">
+      <div className="flex justify-between items-center mb-6 w-full">
         <div className="flex items-center gap-3">
           <Layers3 className="h-8 w-8" />
           <h1 className="text-3xl font-bold">Categories</h1>
@@ -206,7 +206,7 @@ export default function Category() {
 
         <TabsContent value="grid" className="mt-0">
           <ScrollArea className="h-[calc(100vh-12rem)]">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
               {filteredCategories.map((category) => (
                 <CategoryCard
                   key={category.id}

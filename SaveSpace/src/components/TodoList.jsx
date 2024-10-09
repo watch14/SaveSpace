@@ -419,8 +419,8 @@ export default function TodoList() {
     });
 
   return (
-    <div className="container mx-auto p-4 w-full ">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container min-w-full px-4">
+      <div className="flex justify-between items-center mb-6 w-full">
         <div className="flex flex-row justify-center items-center gap-3">
           <ListChecks className="w-full h-full" />
           <h1 className="text-3xl font-bold ">Tasks</h1>
