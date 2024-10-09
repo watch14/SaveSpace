@@ -96,7 +96,7 @@ export default function TodoList() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("notDone");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState(null);
   const [sortOrder, setSortOrder] = useState("none");
@@ -616,9 +616,9 @@ export default function TodoList() {
               <SelectValue placeholder="Filter tasks" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Tasks</SelectItem>
-              <SelectItem value="done">Done</SelectItem>
               <SelectItem value="notDone">On Going</SelectItem>
+              <SelectItem value="done">Done</SelectItem>
+              <SelectItem value="all">All Tasks</SelectItem>
             </SelectContent>
           </Select>
 
