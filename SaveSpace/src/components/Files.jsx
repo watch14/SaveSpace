@@ -85,18 +85,20 @@ export default function Files() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchData = useCallback(async () => {
-    if (currentUser) {
-      setLoading(true);
-      await fetchCategories();
-      await fetchFiles();
-      setLoading(false);
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      if (currentUser) {
+        await fetchCategories();
+      }
+    };
+    fetchData();
   }, [currentUser]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    console.log(categories);
+    fetchFiles();
+    setLoading(false);
+  }, [categories]);
 
   const fetchCategories = async () => {
     try {
@@ -417,7 +419,7 @@ export default function Files() {
         </TabsList>
 
         <TabsContent value="grid">
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
             {filteredFiles.map((file, index) => (
               <FileCard
                 key={index}
@@ -489,7 +491,7 @@ function FileCard({
         <div className="flex justify-center items-center h-32 bg-muted rounded-md">
           {renderFilePreview(file)}
         </div>
-        <div className="mt-4 flex justify-between items-center">
+        <div className="mt-4 flex justify-center items-center">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
           <Button
             variant="ghost"
