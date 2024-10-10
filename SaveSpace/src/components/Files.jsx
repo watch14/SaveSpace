@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { storage, db } from "@/config/firebase";
 import {
@@ -16,6 +16,7 @@ import {
   doc,
   arrayUnion,
   arrayRemove,
+  deleteDoc,
 } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -23,12 +24,12 @@ import {
   Search,
   File,
   Trash2,
-  Layers3,
   FileText,
   LayoutGrid,
   StretchHorizontal,
   Edit,
   Loader2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,21 +85,18 @@ export default function Files() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (currentUser) {
-        setLoading(true);
-        await fetchCategories();
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async () => {
+    if (currentUser) {
+      setLoading(true);
+      await fetchCategories();
+      await fetchFiles();
+      setLoading(false);
+    }
   }, [currentUser]);
 
   useEffect(() => {
-    console.log(categories);
-    fetchFiles();
-    setLoading(false);
-  }, [categories]);
+    fetchData();
+  }, [fetchData]);
 
   const fetchCategories = async () => {
     try {
@@ -173,7 +171,6 @@ export default function Files() {
         description: "Please select a file and a category",
         variant: "destructive",
       });
-
       return;
     }
 
@@ -282,7 +279,7 @@ export default function Files() {
         <img
           src={file.url}
           alt={file.name}
-          className="w-full h-32 object-cover rounded"
+          className="w-full h-full object-cover rounded overflow-hidden"
         />
       );
     } else {
@@ -301,10 +298,10 @@ export default function Files() {
   }
 
   return (
-    <div className="container min-w-full px-4">
-      <div className="flex justify-between items-center mb-6 w-full">
+    <div className="container min-w-full px-4 py-8">
+      <div className="flex justify-between items-center mb-8 w-full">
         <div className="flex items-center gap-3">
-          <File className="h-8 w-8" />
+          <File className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold">Files</h1>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -320,33 +317,41 @@ export default function Files() {
                 Choose a file to upload to your SaveSpace and select a category.
               </DialogDescription>
             </DialogHeader>
-            <DialogDescription>
-              <p className="text-muted-foreground">
-                Select a file from your device to upload to your SaveSpace.
-              </p>
-            </DialogDescription>
-            <Input
-              id="file-upload"
-              type="file"
-              onChange={(e) => setFileUpload(e.target.files[0])}
-              disabled={uploading}
-            />
-            <Select
-              onValueChange={setSelectedCategory}
-              value={selectedCategory}
-              disabled={uploading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="file-upload" className="text-right">
+                  File
+                </label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  className="col-span-3"
+                  onChange={(e) => setFileUpload(e.target.files[0])}
+                  disabled={uploading}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="category" className="text-right">
+                  Category
+                </label>
+                <Select
+                  onValueChange={setSelectedCategory}
+                  value={selectedCategory}
+                  disabled={uploading}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <DialogFooter>
               <Button type="submit" onClick={uploadFile} disabled={uploading}>
                 {uploading ? (
@@ -363,84 +368,92 @@ export default function Files() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="grid" className="w-full">
-        <div className="flex justify-between items-center mb-6 gap-4">
-          <div className="relative w-full">
-            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search files..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 h-full"
-            />
-          </div>
-          <Select onValueChange={setCategoryFilter} value={categoryFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <TabsList>
-            <TabsTrigger className="h-fit w-fit" value="grid">
-              <LayoutGrid />
-            </TabsTrigger>
-            <TabsTrigger value="list">
-              <StretchHorizontal className="h-5 w-5" />
-            </TabsTrigger>
-          </TabsList>
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-grow">
+          <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search files..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 h-full"
+          />
+          {searchTerm && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-2"
+              onClick={() => setSearchTerm("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
+        <Select onValueChange={setCategoryFilter} value={categoryFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <TabsContent value="grid" className="mt-0">
-          <ScrollArea className="h-[calc(100vh-12rem)]">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-              {filteredFiles.map((file, index) => (
-                <FileCard
-                  key={index}
-                  file={file}
-                  deleteFile={deleteFile}
-                  renderFilePreview={renderFilePreview}
-                  categories={categories}
-                  updateFileCategory={updateFileCategory}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+      <Tabs defaultValue="grid" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="grid">
+            <LayoutGrid className="h-4 w-4 mr-2" />
+            Grid View
+          </TabsTrigger>
+          <TabsTrigger value="list">
+            <StretchHorizontal className="h-4 w-4 mr-2" />
+            List View
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="grid">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredFiles.map((file, index) => (
+              <FileCard
+                key={index}
+                file={file}
+                deleteFile={deleteFile}
+                renderFilePreview={renderFilePreview}
+                categories={categories}
+                updateFileCategory={updateFileCategory}
+              />
+            ))}
+          </div>
         </TabsContent>
 
-        <TabsContent value="list" className="mt-0">
-          <ScrollArea className="h-[calc(100vh-12rem)]">
-            <div className="space-y-4">
-              {filteredFiles.map((file, index) => (
-                <FileListItem
-                  key={index}
-                  file={file}
-                  deleteFile={deleteFile}
-                  renderFilePreview={renderFilePreview}
-                  categories={categories}
-                  updateFileCategory={updateFileCategory}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+        <TabsContent value="list">
+          <div className="space-y-4 overflow-hidden">
+            {filteredFiles.map((file, index) => (
+              <FileListItem
+                key={index}
+                file={file}
+                deleteFile={deleteFile}
+                renderFilePreview={renderFilePreview}
+                categories={categories}
+                updateFileCategory={updateFileCategory}
+              />
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 
       {filteredFiles.length === 0 && (
         <Card className="mt-8">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <File className="h-12 w-12 text-muted-foreground mb-4" />
+            <File className="h-12  w-12 text-muted-foreground mb-4" />
             <h2 className="text-lg font-semibold mb-2">No Files Found</h2>
             <p className="text-muted-foreground text-center">
-              {searchTerm || categoryFilter
+              {searchTerm || categoryFilter !== "all"
                 ? "No files match your search or category filter. Try different criteria."
                 : "Upload a new file to get started."}
             </p>
@@ -473,10 +486,10 @@ function FileCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow p-4">
-        <div className="flex justify-center items-center h-32">
+        <div className="flex justify-center items-center h-32 bg-muted rounded-md">
           {renderFilePreview(file)}
         </div>
-        <div className="mt-2 flex justify-between items-center">
+        <div className="mt-4 flex justify-between items-center">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
           <Button
             variant="ghost"
@@ -562,7 +575,9 @@ function FileListItem({
     <Card>
       <CardContent className="flex items-center justify-between py-4">
         <div className="flex items-center">
-          <div className="mr-4 w-16">{renderFilePreview(file)}</div>
+          <div className="mr-4 w-16 h-16 flex items-center justify-center bg-muted rounded-md">
+            {renderFilePreview(file)}
+          </div>
           <div>
             <span className="font-medium">{file.name}</span>
             <p className="text-sm text-muted-foreground">Size: {file.size}</p>
