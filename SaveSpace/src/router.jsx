@@ -10,6 +10,7 @@ import NotFound from "./components/NotFound.jsx";
 import Profile from "./components/Profile.jsx";
 import TodoList from "./components/TodoList.jsx";
 import Category from "./components/Category.jsx";
+import Files from "./components/Files.jsx";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "/category",
         element: <ProtectedRoute element={<Category />} isRestricted={false} />,
+      },
+      {
+        path: "/files",
+        element: <ProtectedRoute element={<Files />} isRestricted={false} />,
       },
       {
         path: "*",

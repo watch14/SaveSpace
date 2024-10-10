@@ -49,6 +49,7 @@ export default function Dashboard() {
       {/* Call showToast on button click */}
       <Button onClick={showToast}>Show Toast</Button>
 
+      {/* Color Palette */}
       <div className="p-4">
         <h2 className="text-lg font-bold mb-2">Color Palette</h2>
         <table className="min-w-full border-collapse">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Home, Layers3, ListChecks, User, Settings } from "lucide-react";
+import { Home, Layers3, ListChecks, User, Settings, Files } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -72,6 +72,7 @@ export function Aside() {
           <NavItem href="/" icon={Home} label="Dashboard" />
           <NavItem href="/category" icon={Layers3} label="Categories" />
           <NavItem href="/todo" icon={ListChecks} label="Tasks" />
+          <NavItem href="/files" icon={Files} label="Files" />
         </nav>
 
         <nav className="flex flex-col items-center space-y-4">
