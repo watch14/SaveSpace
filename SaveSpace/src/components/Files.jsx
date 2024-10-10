@@ -28,6 +28,7 @@ import {
   LayoutGrid,
   StretchHorizontal,
   Edit,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,8 +78,9 @@ export default function Files() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -86,17 +88,15 @@ export default function Files() {
     const fetchData = async () => {
       if (currentUser) {
         setLoading(true);
-
-        await fetchCategories(); // Wait for categories to load first
+        await fetchCategories();
       }
     };
     fetchData();
   }, [currentUser]);
 
-  // Log categories after they are fetched
   useEffect(() => {
     console.log(categories);
-    fetchFiles(); // Now fetch files
+    fetchFiles();
     setLoading(false);
   }, [categories]);
 
@@ -127,12 +127,12 @@ export default function Files() {
       const urls = await Promise.all(
         fileList.items.map(async (item) => {
           const downloadURL = await getDownloadURL(item);
-          const category = await getFileCategory(downloadURL); // This will now work correctly
+          const category = await getFileCategory(downloadURL);
           const metadata = await getMetadata(item);
           return {
             name: item.name,
             url: downloadURL,
-            category: category, // Will now be categorized correctly
+            category: category,
             size: formatFileSize(metadata.size),
           };
         })
@@ -173,9 +173,11 @@ export default function Files() {
         description: "Please select a file and a category",
         variant: "destructive",
       });
+
       return;
     }
 
+    setUploading(true);
     try {
       const user = currentUser.displayName;
       const storageRef = ref(storage, `${user}'s Files/${fileUpload.name}`);
@@ -201,6 +203,8 @@ export default function Files() {
         description: "Failed to upload file",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -219,15 +223,16 @@ export default function Files() {
       }
 
       // Remove file link from categoryAttachment
-      const categoryAttachmentRef = doc(
-        db,
-        "categoryAttachment",
-        "snippet-2SBnC8nOIGj35egChcFTOAlbSQ0OrC"
-      );
-      await updateDoc(categoryAttachmentRef, {
-        files: arrayRemove(fileUrl),
+      const categoryRef = collection(db, "categoryAttachment");
+      const querySnapshot = await getDocs(categoryRef);
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.fileUrl === fileUrl) {
+          deleteDoc(doc.ref);
+        }
       });
 
+      await fetchCategories();
       await fetchFiles();
       toast({ title: "Success", description: "File deleted successfully" });
     } catch (error) {
@@ -288,7 +293,7 @@ export default function Files() {
   const filteredFiles = fileURLs.filter(
     (file) =>
       file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (categoryFilter ? file.category === categoryFilter : true)
+      (categoryFilter === "all" || file.category === categoryFilter)
   );
 
   if (loading) {
@@ -299,7 +304,7 @@ export default function Files() {
     <div className="container min-w-full px-4">
       <div className="flex justify-between items-center mb-6 w-full">
         <div className="flex items-center gap-3">
-          <Layers3 className="h-8 w-8" />
+          <File className="h-8 w-8" />
           <h1 className="text-3xl font-bold">Files</h1>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -315,14 +320,21 @@ export default function Files() {
                 Choose a file to upload to your SaveSpace and select a category.
               </DialogDescription>
             </DialogHeader>
+            <DialogDescription>
+              <p className="text-muted-foreground">
+                Select a file from your device to upload to your SaveSpace.
+              </p>
+            </DialogDescription>
             <Input
               id="file-upload"
               type="file"
               onChange={(e) => setFileUpload(e.target.files[0])}
+              disabled={uploading}
             />
             <Select
               onValueChange={setSelectedCategory}
               value={selectedCategory}
+              disabled={uploading}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
@@ -336,8 +348,15 @@ export default function Files() {
               </SelectContent>
             </Select>
             <DialogFooter>
-              <Button type="submit" onClick={uploadFile}>
-                Upload File
+              <Button type="submit" onClick={uploadFile} disabled={uploading}>
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  "Upload File"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -361,7 +380,8 @@ export default function Files() {
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="l">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
+
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -471,7 +491,6 @@ function FileCard({
             defaultValue={file.category}
             onValueChange={(newCategoryId) => {
               updateFileCategory(file.url, file.category, newCategoryId);
-
               setIsEditing(false);
             }}
           >
