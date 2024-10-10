@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { storage } from "@/config/firebase";
+import { storage, db } from "@/config/firebase";
 import {
   ref,
   uploadBytes,
   listAll,
   getDownloadURL,
   deleteObject,
+  getMetadata,
 } from "firebase/storage";
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus,
   Search,
   File,
-  Save,
-  Edit,
   Trash2,
   Layers3,
   FileText,
   LayoutGrid,
   StretchHorizontal,
+  Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,22 +60,63 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import Loading from "./ui/loader";
 
 export default function Files() {
   const { currentUser } = useAuth();
   const [fileUpload, setFileUpload] = useState(null);
   const [fileURLs, setFileURLs] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (currentUser) {
-      fetchFiles();
-    }
-    setLoading(false);
+    const fetchData = async () => {
+      if (currentUser) {
+        setLoading(true);
+
+        await fetchCategories(); // Wait for categories to load first
+      }
+    };
+    fetchData();
   }, [currentUser]);
+
+  // Log categories after they are fetched
+  useEffect(() => {
+    console.log(categories);
+    fetchFiles(); // Now fetch files
+    setLoading(false);
+  }, [categories]);
+
+  const fetchCategories = async () => {
+    try {
+      const categoryRef = collection(db, "category");
+      const data = await getDocs(categoryRef);
+      const categoryList = data.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((category) => category.createdBy === currentUser?.uid);
+      setCategories(categoryList);
+    } catch (error) {
+      console.error("Error fetching categories: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch categories",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchFiles = async () => {
     try {
@@ -78,9 +127,13 @@ export default function Files() {
       const urls = await Promise.all(
         fileList.items.map(async (item) => {
           const downloadURL = await getDownloadURL(item);
+          const category = await getFileCategory(downloadURL); // This will now work correctly
+          const metadata = await getMetadata(item);
           return {
             name: item.name,
             url: downloadURL,
+            category: category, // Will now be categorized correctly
+            size: formatFileSize(metadata.size),
           };
         })
       );
@@ -96,11 +149,28 @@ export default function Files() {
     }
   };
 
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const getFileCategory = async (fileUrl) => {
+    for (const category of categories) {
+      if (category.files && category.files.includes(fileUrl)) {
+        return category.id;
+      }
+    }
+    return null;
+  };
+
   const uploadFile = async () => {
-    if (!fileUpload) {
+    if (!fileUpload || !selectedCategory) {
       toast({
         title: "Error",
-        description: "No file selected",
+        description: "Please select a file and a category",
         variant: "destructive",
       });
       return;
@@ -111,8 +181,17 @@ export default function Files() {
       const storageRef = ref(storage, `${user}'s Files/${fileUpload.name}`);
 
       await uploadBytes(storageRef, fileUpload);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Add file URL to the selected category
+      const categoryRef = doc(db, "category", selectedCategory);
+      await updateDoc(categoryRef, {
+        files: arrayUnion(downloadURL),
+      });
+
       await fetchFiles();
       setFileUpload(null);
+      setSelectedCategory("");
       setDialogOpen(false);
       toast({ title: "Success", description: "File uploaded successfully" });
     } catch (error) {
@@ -125,11 +204,20 @@ export default function Files() {
     }
   };
 
-  const deleteFile = async (fileName) => {
+  const deleteFile = async (fileName, fileUrl, categoryId) => {
     try {
       const user = currentUser.displayName;
       const fileRef = ref(storage, `${user}'s Files/${fileName}`);
       await deleteObject(fileRef);
+
+      // Remove file URL from the category
+      if (categoryId) {
+        const categoryRef = doc(db, "category", categoryId);
+        await updateDoc(categoryRef, {
+          files: arrayRemove(fileUrl),
+        });
+      }
+
       await fetchFiles();
       toast({ title: "Success", description: "File deleted successfully" });
     } catch (error) {
@@ -137,6 +225,35 @@ export default function Files() {
       toast({
         title: "Error",
         description: "Failed to delete file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateFileCategory = async (fileUrl, oldCategoryId, newCategoryId) => {
+    try {
+      if (oldCategoryId) {
+        const oldCategoryRef = doc(db, "category", oldCategoryId);
+        await updateDoc(oldCategoryRef, {
+          files: arrayRemove(fileUrl),
+        });
+      }
+
+      const newCategoryRef = doc(db, "category", newCategoryId);
+      await updateDoc(newCategoryRef, {
+        files: arrayUnion(fileUrl),
+      });
+
+      await fetchFiles();
+      toast({
+        title: "Success",
+        description: "File category updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating file category: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to update file category",
         variant: "destructive",
       });
     }
@@ -158,16 +275,14 @@ export default function Files() {
     }
   };
 
-  const filteredFiles = fileURLs.filter((file) =>
-    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFiles = fileURLs.filter(
+    (file) =>
+      file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (categoryFilter ? file.category === categoryFilter : true)
   );
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -187,7 +302,7 @@ export default function Files() {
             <DialogHeader>
               <DialogTitle>Upload File</DialogTitle>
               <DialogDescription>
-                Choose a file to upload to your SaveSpace.
+                Choose a file to upload to your SaveSpace and select a category.
               </DialogDescription>
             </DialogHeader>
             <Input
@@ -195,6 +310,21 @@ export default function Files() {
               type="file"
               onChange={(e) => setFileUpload(e.target.files[0])}
             />
+            <Select
+              onValueChange={setSelectedCategory}
+              value={selectedCategory}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <DialogFooter>
               <Button type="submit" onClick={uploadFile}>
                 Upload File
@@ -216,6 +346,19 @@ export default function Files() {
               className="pl-8 h-full"
             />
           </div>
+          <Select onValueChange={setCategoryFilter} value={categoryFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="l">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <TabsList>
             <TabsTrigger className="h-fit w-fit" value="grid">
               <LayoutGrid />
@@ -235,6 +378,8 @@ export default function Files() {
                   file={file}
                   deleteFile={deleteFile}
                   renderFilePreview={renderFilePreview}
+                  categories={categories}
+                  updateFileCategory={updateFileCategory}
                 />
               ))}
             </div>
@@ -250,6 +395,8 @@ export default function Files() {
                   file={file}
                   deleteFile={deleteFile}
                   renderFilePreview={renderFilePreview}
+                  categories={categories}
+                  updateFileCategory={updateFileCategory}
                 />
               ))}
             </div>
@@ -263,8 +410,8 @@ export default function Files() {
             <File className="h-12 w-12 text-muted-foreground mb-4" />
             <h2 className="text-lg font-semibold mb-2">No Files Found</h2>
             <p className="text-muted-foreground text-center">
-              {searchTerm
-                ? "No files match your search. Try a different term."
+              {searchTerm || categoryFilter
+                ? "No files match your search or category filter. Try different criteria."
                 : "Upload a new file to get started."}
             </p>
           </CardContent>
@@ -274,7 +421,19 @@ export default function Files() {
   );
 }
 
-function FileCard({ file, deleteFile, renderFilePreview }) {
+function FileCard({
+  file,
+  deleteFile,
+  renderFilePreview,
+  categories,
+  updateFileCategory,
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const getCategoryName = (categoryId) => {
+    return categories.find((c) => c.id === categoryId)?.name ?? "Uncategorized";
+  };
+
   return (
     <Card className="flex flex-col">
       <CardHeader className="p-4">
@@ -287,6 +446,38 @@ function FileCard({ file, deleteFile, renderFilePreview }) {
         <div className="flex justify-center items-center h-32">
           {renderFilePreview(file)}
         </div>
+        <div className="mt-2 flex justify-between items-center">
+          <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </div>
+        {isEditing && (
+          <Select
+            defaultValue={file.category}
+            onValueChange={(newCategoryId) => {
+              updateFileCategory(file.url, file.category, newCategoryId);
+
+              setIsEditing(false);
+            }}
+          >
+            <SelectTrigger className="w-full mt-2">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <p className="text-sm text-muted-foreground mt-2">Size: {file.size}</p>
       </CardContent>
       <CardFooter className="flex justify-between p-4">
         <Button variant="outline" size="sm" asChild>
@@ -312,7 +503,7 @@ function FileCard({ file, deleteFile, renderFilePreview }) {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
-                onClick={() => deleteFile(file.name)}
+                onClick={() => deleteFile(file.name, file.url, file.category)}
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </AlertDialogAction>
@@ -324,15 +515,60 @@ function FileCard({ file, deleteFile, renderFilePreview }) {
   );
 }
 
-function FileListItem({ file, deleteFile, renderFilePreview }) {
+function FileListItem({
+  file,
+  deleteFile,
+  renderFilePreview,
+  categories,
+  updateFileCategory,
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find((c) => c.id === categoryId);
+    return category ? category.name : "Uncategorized";
+  };
+
   return (
     <Card>
       <CardContent className="flex items-center justify-between py-4">
         <div className="flex items-center">
           <div className="mr-4 w-16">{renderFilePreview(file)}</div>
-          <span className="font-medium">{file.name}</span>
+          <div>
+            <span className="font-medium">{file.name}</span>
+            <p className="text-sm text-muted-foreground">Size: {file.size}</p>
+          </div>
         </div>
         <div className="flex items-center space-x-2">
+          <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
+          {isEditing ? (
+            <Select
+              defaultValue={file.category}
+              onValueChange={(newCategoryId) => {
+                updateFileCategory(file.url, file.category, newCategoryId);
+                setIsEditing(false);
+              }}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
           <Button variant="outline" size="sm" asChild>
             <a href={file.url} target="_blank" rel="noopener noreferrer">
               View
@@ -356,7 +592,7 @@ function FileListItem({ file, deleteFile, renderFilePreview }) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
-                  onClick={() => deleteFile(file.name)}
+                  onClick={() => deleteFile(file.name, file.url, file.category)}
                 >
                   <Trash2 className="mr-2 h-4 w-4" /> Delete
                 </AlertDialogAction>
