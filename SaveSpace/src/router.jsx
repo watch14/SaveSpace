@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import ScrollToTop from "./utils/ScrollToTop.jsx";
 import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
-import { Auth } from "./components/Auth.jsx";
+import Auth from "./components/Auth.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import NotFound from "./components/NotFound.jsx";
 import Profile from "./components/Profile.jsx";

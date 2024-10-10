@@ -6,7 +6,6 @@ import {
   signInWithPopup,
   updateProfile,
 } from "firebase/auth";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -16,15 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { Input } from "./ui/input.jsx";
-import { Button } from "./ui/button.jsx";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { FcGoogle } from "react-icons/fc";
-import { FaGoogle } from "react-icons/fa";
 
-export const Auth = () => {
+export default function Auth() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -66,14 +63,12 @@ export const Auth = () => {
 
   const handleSignUp = async () => {
     setError("");
-
-    // Perform validation before attempting sign in
     const isNameValid = validateName(name);
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
 
     if (!isNameValid || !isEmailValid || !isPasswordValid) {
-      return; // Exit if any validation fails
+      return;
     }
 
     try {
@@ -84,9 +79,8 @@ export const Auth = () => {
       );
       const user = userCredential.user;
       await updateProfile(user, { displayName: name });
-
       console.log("user:", user);
-      window.location.href = "/"; //redirect to dashboard
+      window.location.href = "/";
     } catch (error) {
       const errorMessage = error.code.split("/")[1].split("-").join(" ");
       setError(errorMessage);
@@ -103,9 +97,8 @@ export const Auth = () => {
         password
       );
       const user = userCredential.user;
-
       console.log("user:", user);
-      window.location.href = "/"; //redirect to dashboard
+      window.location.href = "/";
     } catch (error) {
       setError(error.message);
     }
@@ -116,29 +109,38 @@ export const Auth = () => {
       setError("");
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
-
       console.log("user:", user);
-      window.location.href = "/"; //redirect to dashboard
+      window.location.href = "/";
     } catch (error) {
       setError(error.message);
     }
   };
 
   return (
-    <div className="container min-w-full min-h-full px-4 my-auto">
-      <Tabs defaultValue="Sign In" className="mt-auto ">
-        <TabsList className="grid w-full grid-cols-2 h-fit ">
-          <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
-          <TabsTrigger value="Sign In">Sign In</TabsTrigger>
-        </TabsList>
-        <TabsContent value="Sign Up">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sign Up</CardTitle>
-              <CardDescription>Create an accont.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-3 w-full ">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-primary">SaveSpace</h1>
+          <p className="text-muted-foreground mt-2">
+            Secure your digital world
+          </p>
+        </div>
+        <Tabs defaultValue="Sign In" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="Sign Up">Sign Up</TabsTrigger>
+            <TabsTrigger value="Sign In">Sign In</TabsTrigger>
+          </TabsList>
+          <TabsContent value="Sign Up">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold text-center">
+                  Create an Account
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Join SaveSpace today
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
                   <Input
                     type="text"
@@ -150,12 +152,9 @@ export const Auth = () => {
                     value={name}
                   />
                   {nameError && (
-                    <p className="text-red-500 text-sm mt-1 text-left">
-                      {nameError}
-                    </p>
+                    <p className="text-destructive text-sm mt-1">{nameError}</p>
                   )}
                 </div>
-
                 <div>
                   <Input
                     type="email"
@@ -167,12 +166,11 @@ export const Auth = () => {
                     value={email}
                   />
                   {emailError && (
-                    <p className="text-red-500 text-sm mt-1 text-left">
+                    <p className="text-destructive text-sm mt-1">
                       {emailError}
                     </p>
                   )}
                 </div>
-
                 <div>
                   <Input
                     type="password"
@@ -184,47 +182,53 @@ export const Auth = () => {
                     value={password}
                   />
                   {passwordError && (
-                    <p className="text-red-500 text-sm mt-1 text-left">
+                    <p className="text-destructive text-sm mt-1">
                       {passwordError}
                     </p>
                   )}
                 </div>
-
                 {error && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-5 w-5" />
-                    <AlertTitle className="text-left text-red-600">
-                      {error}
-                    </AlertTitle>
+                    <AlertTitle>{error}</AlertTitle>
                   </Alert>
                 )}
-              </div>
-            </CardContent>
-            <CardFooter className="grid w-full grid-cols-2 gap-3">
-              <Button className="w-full" onClick={handleSignUp}>
-                Sign Up
-              </Button>
-
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={handleGoogleSignIn}
-              >
-                <FcGoogle />
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        <TabsContent value="Sign In">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sign In</CardTitle>
-              <CardDescription>
-                Sign in with an existing account.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-3 w-full ">
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-3">
+                <Button className="w-full" onClick={handleSignUp}>
+                  Sign Up
+                </Button>
+                <div className="relative w-full">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                >
+                  <FcGoogle className="mr-2 h-4 w-4" /> Google
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          <TabsContent value="Sign In">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold text-center">
+                  Welcome Back
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Sign in to your SaveSpace account
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
                   <Input
                     type="email"
@@ -236,12 +240,11 @@ export const Auth = () => {
                     value={email}
                   />
                   {emailError && (
-                    <p className="text-red-500 text-sm mt-1 text-left">
+                    <p className="text-destructive text-sm mt-1">
                       {emailError}
                     </p>
                   )}
                 </div>
-
                 <div>
                   <Input
                     type="password"
@@ -253,38 +256,44 @@ export const Auth = () => {
                     value={password}
                   />
                   {passwordError && (
-                    <p className="text-red-500 text-sm mt-1 text-left">
+                    <p className="text-destructive text-sm mt-1">
                       {passwordError}
                     </p>
                   )}
                 </div>
-
                 {error && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-5 w-5" />
-                    <AlertTitle className="text-left text-red-600">
-                      {error}
-                    </AlertTitle>
+                    <AlertTitle>{error}</AlertTitle>
                   </Alert>
                 )}
-              </div>
-            </CardContent>
-            <CardFooter className="grid w-full grid-cols-2 gap-3">
-              <Button className="w-full" onClick={handleSignIn}>
-                Sign In
-              </Button>
-
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={handleGoogleSignIn}
-              >
-                <FcGoogle />
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-3">
+                <Button className="w-full" onClick={handleSignIn}>
+                  Sign In
+                </Button>
+                <div className="relative w-full">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                >
+                  <FcGoogle className="mr-2 h-4 w-4" /> Google
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
-};
+}
