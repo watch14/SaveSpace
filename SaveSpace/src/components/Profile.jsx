@@ -91,7 +91,7 @@ export default function Profile() {
     }
   };
 
-  if (!currentUser) {
+  if (loading) {
     return <Loading />;
   }
 
