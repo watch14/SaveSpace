@@ -28,6 +28,7 @@ import { Mail, Calendar, Edit, Loader2 } from "lucide-react";
 import Loading from "./ui/loader";
 
 export default function Profile() {
+  const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const [editedUser, setEditedUser] = useState({
@@ -43,6 +44,7 @@ export default function Profile() {
       setUserProperties(analytics, {
         favorite_food: currentUser.favoriteFood || "Not set",
       });
+      setLoading(false);
     }
   }, [currentUser]);
 
