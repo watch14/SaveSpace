@@ -218,6 +218,16 @@ export default function Files() {
         });
       }
 
+      // Remove file link from categoryAttachment
+      const categoryAttachmentRef = doc(
+        db,
+        "categoryAttachment",
+        "snippet-2SBnC8nOIGj35egChcFTOAlbSQ0OrC"
+      );
+      await updateDoc(categoryAttachmentRef, {
+        files: arrayRemove(fileUrl),
+      });
+
       await fetchFiles();
       toast({ title: "Success", description: "File deleted successfully" });
     } catch (error) {
@@ -243,7 +253,7 @@ export default function Files() {
       await updateDoc(newCategoryRef, {
         files: arrayUnion(fileUrl),
       });
-
+      await fetchCategories();
       await fetchFiles();
       toast({
         title: "Success",
