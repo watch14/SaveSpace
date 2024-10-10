@@ -8,6 +8,7 @@ import {
   getDownloadURL,
   deleteObject,
   getMetadata,
+  updateMetadata,
 } from "firebase/storage";
 import {
   collection,
@@ -30,6 +31,7 @@ import {
   Edit,
   Loader2,
   X,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,6 +91,8 @@ export default function Files() {
     const fetchData = async () => {
       if (currentUser) {
         await fetchCategories();
+        //wait for 2 sec
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     };
     fetchData();
@@ -97,7 +101,10 @@ export default function Files() {
   useEffect(() => {
     console.log(categories);
     fetchFiles();
-    setLoading(false);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1500);
   }, [categories]);
 
   const fetchCategories = async () => {
@@ -273,6 +280,46 @@ export default function Files() {
     }
   };
 
+  const renameFile = async (oldFileName, newFileName, fileUrl, categoryId) => {
+    try {
+      const user = currentUser.displayName;
+      const oldFileRef = ref(storage, `${user}'s Files/${oldFileName}`);
+      const newFileRef = ref(storage, `${user}'s Files/${newFileName}`);
+
+      // Get the file content
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+
+      // Upload the file with the new name
+      await uploadBytes(newFileRef, blob);
+
+      // Update the download URL in the category
+      if (categoryId) {
+        const categoryRef = doc(db, "category", categoryId);
+        const newDownloadURL = await getDownloadURL(newFileRef);
+        await updateDoc(categoryRef, {
+          files: arrayRemove(fileUrl),
+        });
+        await updateDoc(categoryRef, {
+          files: arrayUnion(newDownloadURL),
+        });
+      }
+
+      // Delete the old file
+      await deleteObject(oldFileRef);
+
+      await fetchFiles();
+      toast({ title: "Success", description: "File renamed successfully" });
+    } catch (error) {
+      console.error("Error renaming file: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to rename file",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderFilePreview = (file) => {
     const fileType = file.name.split(".").pop().toLowerCase();
 
@@ -281,7 +328,7 @@ export default function Files() {
         <img
           src={file.url}
           alt={file.name}
-          className="w-full h-full object-cover rounded overflow-hidden"
+          className="w-full h-32 object-cover rounded"
         />
       );
     } else {
@@ -419,7 +466,7 @@ export default function Files() {
         </TabsList>
 
         <TabsContent value="grid">
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredFiles.map((file, index) => (
               <FileCard
                 key={index}
@@ -428,13 +475,14 @@ export default function Files() {
                 renderFilePreview={renderFilePreview}
                 categories={categories}
                 updateFileCategory={updateFileCategory}
+                renameFile={renameFile}
               />
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="list">
-          <div className="space-y-4 overflow-hidden">
+          <div className="space-y-4">
             {filteredFiles.map((file, index) => (
               <FileListItem
                 key={index}
@@ -443,6 +491,7 @@ export default function Files() {
                 renderFilePreview={renderFilePreview}
                 categories={categories}
                 updateFileCategory={updateFileCategory}
+                renameFile={renameFile}
               />
             ))}
           </div>
@@ -472,11 +521,19 @@ function FileCard({
   renderFilePreview,
   categories,
   updateFileCategory,
+  renameFile,
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newFileName, setNewFileName] = useState(file.name);
 
   const getCategoryName = (categoryId) => {
     return categories.find((c) => c.id === categoryId)?.name ?? "Uncategorized";
+  };
+
+  const handleRename = () => {
+    renameFile(file.name, newFileName, file.url, file.category);
+    setIsRenaming(false);
   };
 
   return (
@@ -484,22 +541,56 @@ function FileCard({
       <CardHeader className="p-4">
         <CardTitle className="flex items-center text-sm font-medium">
           <File className="mr-2 h-4 w-4 text-primary" />
-          <span className="truncate">{file.name}</span>
+          {isRenaming ? (
+            <Input
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              className="w-full"
+            />
+          ) : (
+            <span className="truncate">{file.name}</span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow p-4">
         <div className="flex justify-center items-center h-32 bg-muted rounded-md">
           {renderFilePreview(file)}
         </div>
-        <div className="mt-4 flex justify-center items-center">
+        <div className="mt-4 flex justify-between items-center">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          <div>
+            {isRenaming ? (
+              <>
+                <Button variant="ghost" size="sm" onClick={handleRename}>
+                  <Save className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsRenaming(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsRenaming(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
         </div>
         {isEditing && (
           <Select
@@ -565,12 +656,20 @@ function FileListItem({
   renderFilePreview,
   categories,
   updateFileCategory,
+  renameFile,
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newFileName, setNewFileName] = useState(file.name);
 
   const getCategoryName = (categoryId) => {
     const category = categories.find((c) => c.id === categoryId);
     return category ? category.name : "Uncategorized";
+  };
+
+  const handleRename = () => {
+    renameFile(file.name, newFileName, file.url, file.category);
+    setIsRenaming(false);
   };
 
   return (
@@ -581,12 +680,42 @@ function FileListItem({
             {renderFilePreview(file)}
           </div>
           <div>
-            <span className="font-medium">{file.name}</span>
+            {isRenaming ? (
+              <Input
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                className="w-full mb-2"
+              />
+            ) : (
+              <span className="font-medium">{file.name}</span>
+            )}
             <p className="text-sm text-muted-foreground">Size: {file.size}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
+          {isRenaming ? (
+            <>
+              <Button variant="ghost" size="sm" onClick={handleRename}>
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsRenaming(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsRenaming(true)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
           {isEditing ? (
             <Select
               defaultValue={file.category}
@@ -612,7 +741,7 @@ function FileListItem({
               size="sm"
               onClick={() => setIsEditing(true)}
             >
-              <Edit className="h-4 w-4" />
+              <LayoutGrid className="h-4 w-4" />
             </Button>
           )}
           <Button variant="outline" size="sm" asChild>
