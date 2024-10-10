@@ -20,6 +20,7 @@ import { auth } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { isUserLoggedIn } from "@/utils/getuser";
 import { SignOut } from "@/utils/SignOut";
+import Loading from "./ui/loader";
 
 const NavItem = ({ href, icon: Icon, label }) => (
   <Tooltip>
@@ -57,11 +58,7 @@ export function Aside() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Loading...
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
