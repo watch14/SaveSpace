@@ -26,6 +26,9 @@ export default function Files() {
 
         await uploadBytes(storageRef, fileUpload);
         console.log("File uploaded successfully");
+        //print the download url
+        const downloadURL = await storageRef.getDownloadURL();
+        console.log("File available at: ", downloadURL);
       } else {
         console.error("No file selected");
       }
