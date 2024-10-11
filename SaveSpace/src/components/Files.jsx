@@ -464,7 +464,7 @@ export default function Files() {
         </div>
 
         <TabsContent value="grid">
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
             {filteredFiles.map((file, index) => (
               <FileCard
                 key={index}
@@ -535,7 +535,7 @@ function FileCard({
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="grid ">
       <CardHeader className="p-4">
         <CardTitle className="flex items-center text-sm font-medium">
           <File className="mr-2 h-4 w-4 text-primary" />
