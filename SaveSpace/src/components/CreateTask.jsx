@@ -49,6 +49,7 @@ import { CalendarIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 
 // Toast
 import { useToast } from "@/hooks/use-toast";
@@ -156,7 +157,9 @@ export default function CreateTask({ onTaskCreated }) {
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
-          <Button>Create Task</Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Create Task
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px] overflow-scroll w-[600px] max-h-[80%]">
           <DialogHeader>

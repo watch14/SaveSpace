@@ -10,8 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import CreateTask from "./CreateTask";
 import { Plus } from "lucide-react";
+import CreateTask from "./CreateTask";
+import CreateCategory from "./CreateCategory";
 
 export function Create() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -40,6 +41,11 @@ export function Create() {
           onTaskCreated={() => setDialogOpen(false)}
           onClose={() => setDialogOpen(false)}
         />
+        <CreateCategory
+          onCategoryCreated={() => setDialogOpen(false)}
+          onClose={() => setDialogOpen(false)}
+        />
+
         {/* dialog content */}
 
         <DialogFooter></DialogFooter>
