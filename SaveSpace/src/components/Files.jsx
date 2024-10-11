@@ -323,6 +323,7 @@ export default function Files() {
   const renderFilePreview = (file) => {
     const fileType = file.name.split(".").pop().toLowerCase();
 
+    // Check if the file is an image
     if (["jpg", "jpeg", "png", "gif"].includes(fileType)) {
       return (
         <img
@@ -331,11 +332,31 @@ export default function Files() {
           className="w-full h-32 object-cover rounded overflow-hidden"
         />
       );
-    } else {
-      return <FileText className="w-16 h-16 " />;
+    }
+
+    // Check if the file is a video
+    else if (["mp4", "mkv", "webm", "mov"].includes(fileType)) {
+      return (
+        <video
+          controls
+          className="w-full h-32 object-cover rounded overflow-hidden"
+        >
+          <source src={file.url} type={`video/${fileType}`} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    // If it's not an image or a video, display the file type with FileText
+    else {
+      return (
+        <div className="flex items-center">
+          <FileText className="w-16 h-16" />
+          <span className="ml-2 text-sm">{fileType.toUpperCase()}</span>
+        </div>
+      );
     }
   };
-
   const filteredFiles = fileURLs.filter(
     (file) =>
       file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -417,7 +438,7 @@ export default function Files() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="grid" className="w-full">
+      <Tabs defaultValue="list" className="w-full">
         <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-grow">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
@@ -641,22 +662,14 @@ function FileListItem({
   return (
     <Card>
       <CardContent className="flex items-center justify-between py-4">
-        <div className="flex items-center">
-          <div className="mr-4 w-16 h-16 flex items-center justify-center bg-muted rounded-md overflow-hidden">
+        <div className="flex items-center ">
+          <div className="mr-4 w-32 h-16 flex items-center justify-center bg-muted rounded-md overflow-hidden">
             {renderFilePreview(file)}
           </div>
-          <div>
-            {isRenaming ? (
-              <Input
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                className="w-full mb-2"
-              />
-            ) : (
-              <span className="font-medium">{file.name}</span>
-            )}
-            <p className="text-sm text-muted-foreground">Size: {file.size}</p>
-          </div>
+        </div>
+        <div className="flex items-center text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis">
+          <File className="mr-2 h-4 w-4 text-primary" />
+          <p className=" w-full overflow-hidden text-ellipsis">{file.name}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
