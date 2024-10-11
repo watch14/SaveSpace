@@ -332,7 +332,7 @@ export default function Files() {
         />
       );
     } else {
-      return <FileText className="w-16 h-16 text-primary" />;
+      return <FileText className="w-16 h-16 " />;
     }
   };
 
