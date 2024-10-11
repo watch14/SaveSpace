@@ -157,7 +157,7 @@ export default function Category() {
     <div className="container min-w-full px-4">
       <div className="flex justify-between items-center mb-6 w-full">
         <div className="flex items-center gap-3">
-          <Layers3 className="h-8 w-8" />
+          <Layers3 className="w-full h-full" />
           <h1 className="text-3xl font-bold">Categories</h1>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
