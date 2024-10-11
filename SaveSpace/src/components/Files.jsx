@@ -99,7 +99,6 @@ export default function Files() {
   }, [currentUser]);
 
   useEffect(() => {
-    console.log(categories);
     fetchFiles();
     setLoading(true);
     setTimeout(() => {
@@ -136,16 +135,23 @@ export default function Files() {
           const downloadURL = await getDownloadURL(item);
           const category = await getFileCategory(downloadURL);
           const metadata = await getMetadata(item);
+
           return {
             name: item.name,
             url: downloadURL,
             category: category,
-            size: formatFileSize(metadata.size),
+            size: metadata.size,
           };
         })
       );
 
       setFileURLs(urls);
+
+      const totalSize = calculateTotalSize(); // Calculate total size in bytes
+
+      // Format total size for display
+      const formattedTotalSize = formatFileSize(totalSize); // Format the total size for display
+      console.log(`Total Size: ${formattedTotalSize}`); // Log the formatted total size
     } catch (error) {
       console.error("Error fetching files: ", error);
       toast({
@@ -162,6 +168,15 @@ export default function Files() {
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const calculateTotalSize = () => {
+    const totalSize = fileURLs.reduce((total, file) => {
+      // Directly use file.size as it should already be a number
+      const size = file.size; // No need to check the type since it's coming from metadata
+      return total + size; // Aggregate the size
+    }, 0);
+    return totalSize; // Return the total size
   };
 
   const getFileCategory = async (fileUrl) => {
@@ -372,7 +387,10 @@ export default function Files() {
       <div className="flex justify-between items-center mb-8 w-full">
         <div className="flex items-center gap-3">
           <File className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Files</h1>
+          <h1 className="text-3xl font-bold">Files</h1>{" "}
+          <p className="text-sm text-muted-foreground mt-2">
+            Total Size: {formatFileSize(calculateTotalSize())}
+          </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -534,6 +552,14 @@ export default function Files() {
   );
 }
 
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
+
 function FileCard({
   file,
   deleteFile,
@@ -599,7 +625,9 @@ function FileCard({
             </SelectContent>
           </Select>
         )}
-        <p className="text-sm text-muted-foreground mt-2">Size: {file.size}</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Size: {formatFileSize(file.size)}
+        </p>
       </CardContent>
       <CardFooter className="flex justify-between p-4">
         <Button variant="outline" size="sm" asChild>
