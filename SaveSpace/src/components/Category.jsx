@@ -189,7 +189,7 @@ export default function Category() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="list" className="w-full">
+      <Tabs defaultValue="grid" className="w-full">
         <div className="flex justify-between items-center mb-6 gap-4 ">
           <div className="relative w-full">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
@@ -203,7 +203,7 @@ export default function Category() {
           </div>
           <TabsList>
             <TabsTrigger className="h-fit w-fit" value="grid">
-              <LayoutGrid />
+              <LayoutGrid className="h-5 w-5 " />
             </TabsTrigger>
             <TabsTrigger value="list">
               <StretchHorizontal className="h-5 w-5 " />
