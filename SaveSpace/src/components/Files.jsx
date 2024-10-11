@@ -196,7 +196,7 @@ export default function Files() {
       await updateDoc(categoryRef, {
         files: arrayUnion(downloadURL),
       });
-
+      await fetchCategories();
       await fetchFiles();
       setFileUpload(null);
       setSelectedCategory("");
