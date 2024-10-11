@@ -438,7 +438,7 @@ export default function Files() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="list" className="w-full">
+      <Tabs defaultValue="grid" className="w-full">
         <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-grow">
             <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
