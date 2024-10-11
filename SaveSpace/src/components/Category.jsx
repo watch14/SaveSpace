@@ -285,14 +285,21 @@ function CategoryCard({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow ">
-        {/* tasks */}
+      <CardContent className="flex flex-row flex-wrap gap-3 ">
+        {/* contetnt */}
         <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
           <ListChecks className="w-4 h-4 mr-1" />
           Tasks:
           <strong className="ml-1"> {category.tasks?.length || 0}</strong>
         </div>
-        {/* tasks */}
+
+        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+          <ListChecks className="w-4 h-4 mr-1" />
+          Files:
+          <strong className="ml-1"> {category.files?.length || 0}</strong>
+        </div>
+
+        {/* contetnt */}
       </CardContent>
       <CardFooter className="flex space-x-2 justify-end">
         {editingCategory === category.id ? (
@@ -365,13 +372,21 @@ function CategoryListItem({
             <span className="font-medium">{category.name}</span>
           )}
         </div>
-        {/* tasks */}
-        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground w-fit">
-          <ListChecks className="w-4 h-4 mr-1" />
-          Tasks:
-          <strong className="ml-1"> {category.tasks?.length || 0}</strong>
+        {/* contetnt */}
+        <div className="flex flex-row flex-wrap gap-3 ">
+          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground w-fit">
+            <ListChecks className="w-4 h-4 mr-1" />
+            Tasks:
+            <strong className="ml-1"> {category.tasks?.length || 0}</strong>
+          </div>
+          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground w-fit">
+            <ListChecks className="w-4 h-4 mr-1" />
+            Files:
+            <strong className="ml-1"> {category.files?.length || 0}</strong>
+          </div>
         </div>
-        {/* tasks */}
+
+        {/* contetnt */}
         <div className="flex items-center space-x-2 ml-auto">
           {editingCategory === category.id ? (
             <Button
