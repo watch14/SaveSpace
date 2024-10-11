@@ -661,17 +661,17 @@ function FileListItem({
 
   return (
     <Card>
-      <CardContent className="flex items-center justify-between py-4">
+      <CardContent className="grid grid-cols-3 items-center justify-between py-4">
         <div className="flex items-center ">
           <div className="mr-4 w-32 h-16 flex items-center justify-center bg-muted rounded-md overflow-hidden">
             {renderFilePreview(file)}
           </div>
         </div>
-        <div className="flex items-center text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis">
+        <div className="flex  text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis">
           <File className="mr-2 h-4 w-4 text-primary" />
           <p className=" w-full overflow-hidden text-ellipsis">{file.name}</p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 ml-auto">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
 
           <Button variant="ghost" size="sm" onClick={() => setIsRenaming(true)}>
