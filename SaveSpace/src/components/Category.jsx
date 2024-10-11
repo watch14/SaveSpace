@@ -212,37 +212,33 @@ export default function Category() {
         </div>
 
         <TabsContent value="grid" className="mt-0">
-          <ScrollArea className="h-[calc(100vh-12rem)]">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-              {filteredCategories.map((category) => (
-                <CategoryCard
-                  key={category.id}
-                  category={category}
-                  editingCategory={editingCategory}
-                  setEditingCategory={setEditingCategory}
-                  updateCategory={updateCategory}
-                  deleteCategory={deleteCategory}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+            {filteredCategories.map((category) => (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                editingCategory={editingCategory}
+                setEditingCategory={setEditingCategory}
+                updateCategory={updateCategory}
+                deleteCategory={deleteCategory}
+              />
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="list" className="mt-0">
-          <ScrollArea className="h-[calc(100vh-12rem)]">
-            <div className="space-y-4">
-              {filteredCategories.map((category) => (
-                <CategoryListItem
-                  key={category.id}
-                  category={category}
-                  editingCategory={editingCategory}
-                  setEditingCategory={setEditingCategory}
-                  updateCategory={updateCategory}
-                  deleteCategory={deleteCategory}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="space-y-4">
+            {filteredCategories.map((category) => (
+              <CategoryListItem
+                key={category.id}
+                category={category}
+                editingCategory={editingCategory}
+                setEditingCategory={setEditingCategory}
+                updateCategory={updateCategory}
+                deleteCategory={deleteCategory}
+              />
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
 

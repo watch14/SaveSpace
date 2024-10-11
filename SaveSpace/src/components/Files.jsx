@@ -328,7 +328,7 @@ export default function Files() {
         <img
           src={file.url}
           alt={file.name}
-          className="w-full h-32 object-cover rounded"
+          className="w-full h-32 object-cover rounded overflow-hidden"
         />
       );
     } else {
@@ -417,53 +417,51 @@ export default function Files() {
         </Dialog>
       </div>
 
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search files..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 h-full"
-          />
-          {searchTerm && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-2 top-2"
-              onClick={() => setSearchTerm("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        <Select onValueChange={setCategoryFilter} value={categoryFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <Tabs defaultValue="grid" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="grid">
-            <LayoutGrid className="h-4 w-4 mr-2" />
-            Grid View
-          </TabsTrigger>
-          <TabsTrigger value="list">
-            <StretchHorizontal className="h-4 w-4 mr-2" />
-            List View
-          </TabsTrigger>
-        </TabsList>
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-grow">
+            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search files..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 h-full"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-2"
+                onClick={() => setSearchTerm("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <Select onValueChange={setCategoryFilter} value={categoryFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <TabsList className="">
+            <TabsTrigger value="grid">
+              <LayoutGrid className="h-4 w-4 " />
+            </TabsTrigger>
+            <TabsTrigger value="list">
+              <StretchHorizontal className="h-4 w-4 " />
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="grid">
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -559,37 +557,13 @@ function FileCard({
         <div className="mt-4 flex justify-between items-center">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
           <div>
-            {isRenaming ? (
-              <>
-                <Button variant="ghost" size="sm" onClick={handleRename}>
-                  <Save className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsRenaming(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsRenaming(true)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
           </div>
         </div>
         {isEditing && (
@@ -676,7 +650,7 @@ function FileListItem({
     <Card>
       <CardContent className="flex items-center justify-between py-4">
         <div className="flex items-center">
-          <div className="mr-4 w-16 h-16 flex items-center justify-center bg-muted rounded-md">
+          <div className="mr-4 w-16 h-16 flex items-center justify-center bg-muted rounded-md overflow-hidden">
             {renderFilePreview(file)}
           </div>
           <div>
@@ -694,28 +668,10 @@ function FileListItem({
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary">{getCategoryName(file.category)}</Badge>
-          {isRenaming ? (
-            <>
-              <Button variant="ghost" size="sm" onClick={handleRename}>
-                <Save className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsRenaming(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsRenaming(true)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          )}
+
+          <Button variant="ghost" size="sm" onClick={() => setIsRenaming(true)}>
+            <Edit className="h-4 w-4" />
+          </Button>
           {isEditing ? (
             <Select
               defaultValue={file.category}
