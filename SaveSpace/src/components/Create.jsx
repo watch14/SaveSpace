@@ -13,6 +13,7 @@ import {
 import { Plus } from "lucide-react";
 import CreateTask from "./CreateTask";
 import CreateCategory from "./CreateCategory";
+import FileUpload from "./FileUpload";
 
 export function Create() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,7 +46,10 @@ export function Create() {
           onCategoryCreated={() => setDialogOpen(false)}
           onClose={() => setDialogOpen(false)}
         />
-
+        <FileUpload
+          onCategoryCreated={() => setDialogOpen(false)}
+          onClose={() => setDialogOpen(false)}
+        />
         {/* dialog content */}
 
         <DialogFooter></DialogFooter>

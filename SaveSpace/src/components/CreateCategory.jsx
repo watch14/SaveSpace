@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -64,11 +65,11 @@ export default function CreateCategory({ onCategoryCreated, onClose }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Category</DialogTitle>
-          <p>
-            Create a category to organize your Space. (Try to keep the title
-            simple and short).
-          </p>
         </DialogHeader>
+        <DialogDescription>
+          Create a category to organize your Space. (Try to keep the title
+          simple and short).
+        </DialogDescription>
         <Input
           type="text"
           value={categoryName}
