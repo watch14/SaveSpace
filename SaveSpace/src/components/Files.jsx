@@ -464,7 +464,7 @@ export default function Files() {
         </div>
 
         <TabsContent value="grid">
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {filteredFiles.map((file, index) => (
               <FileCard
                 key={index}
@@ -498,7 +498,7 @@ export default function Files() {
 
       {filteredFiles.length === 0 && (
         <Card className="mt-8">
-          <CardContent className="flex flex-col items-center justify-center py-12">
+          <CardContent className="flex flex-col items-center justify-center py-12 overflow-hidden">
             <File className="h-12  w-12 text-muted-foreground mb-4" />
             <h2 className="text-lg font-semibold mb-2">No Files Found</h2>
             <p className="text-muted-foreground text-center">
@@ -536,22 +536,14 @@ function FileCard({
 
   return (
     <Card className="grid ">
-      <CardHeader className="p-4">
-        <CardTitle className="flex items-center text-sm font-medium">
+      <CardHeader className="p-4 overflow-hidden">
+        <CardTitle className="flex items-center text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis">
           <File className="mr-2 h-4 w-4 text-primary" />
-          {isRenaming ? (
-            <Input
-              value={newFileName}
-              onChange={(e) => setNewFileName(e.target.value)}
-              className="w-full"
-            />
-          ) : (
-            <span className="truncate">{file.name}</span>
-          )}
+          <p className=" w-full overflow-hidden text-ellipsis">{file.name}</p>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow p-4">
-        <div className="flex justify-center items-center h-32 bg-muted rounded-md">
+      <CardContent className="flex-grow p-4 m-w-full">
+        <div className="flex justify-center items-center h-32 w-full bg-muted rounded-md overflow-hidden">
           {renderFilePreview(file)}
         </div>
         <div className="mt-4 flex justify-between items-center">
