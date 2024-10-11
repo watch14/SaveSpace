@@ -324,7 +324,7 @@ export default function Files() {
     const fileType = file.name.split(".").pop().toLowerCase();
 
     // Check if the file is an image
-    if (["jpg", "jpeg", "png", "gif"].includes(fileType)) {
+    if (["jpg", "jpeg", "png", "gif", "ico"].includes(fileType)) {
       return (
         <img
           src={file.url}
